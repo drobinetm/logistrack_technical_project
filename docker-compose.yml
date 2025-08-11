@@ -38,7 +38,7 @@ services:
 
   symfony:
     build:
-      context: ./backend-symfony
+      context: ./apps/backend-symfony
       dockerfile: Dockerfile
     environment:
       APP_ENV: dev
@@ -48,14 +48,14 @@ services:
       - mysql_symfony
       - redis
     volumes:
-      - ./backend-symfony/app:/var/www/html
+      - ./apps/backend-symfony:/var/www/html/symfony
     ports:
       - "8081:80"
     networks: [tracknet]
 
   django:
     build:
-      context: ./backend-django
+      context: ./apps/backend-django
       dockerfile: Dockerfile
     environment:
       DJANGO_SETTINGS_MODULE: app.settings
@@ -70,7 +70,7 @@ services:
       - mysql_django
       - redis
     volumes:
-      - ./backend-django/app:/app
+      - ./apps/backend-django::/var/www/html/django
     command: gunicorn app.wsgi:application --bind 0.0.0.0:8000 --workers 3
     ports:
       - "8000:8000"
@@ -78,12 +78,14 @@ services:
 
   angular:
     build:
-      context: ./frontend-angular
+      context: ./apps/frontend-angular
       dockerfile: Dockerfile
     container_name: angular_app
     depends_on:
       - symfony
       - django
+    volumes:
+      - ./apps/frontend-angular:/var/www/html/angular
     ports:
       - "8080:80"
     networks: [tracknet]

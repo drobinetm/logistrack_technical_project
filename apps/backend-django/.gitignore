@@ -1,0 +1,43 @@
+# Python virtual environments
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Django database file
+*.sqlite3
+db.sqlite3
+
+# Django migrations cache
+*/migrations/*.pyc
+*/migrations/__pycache__/
+
+# Media and static files
+media/
+staticfiles/
+
+# Pytest cache
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# MacOS
+.DS_Store

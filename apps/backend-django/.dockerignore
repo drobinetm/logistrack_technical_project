@@ -12,7 +12,7 @@ env/
 venv/
 .venv/
 *.env
-.env.*
+.env.dev
 local_settings.py
 media/
 staticfiles/

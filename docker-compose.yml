@@ -4,8 +4,9 @@ services:
   redis:
     image: redis:7.2
     command: ["redis-server","--appendonly","yes"]
+    container_name: server_redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis-data:/data
     networks: [tracknet]
@@ -17,6 +18,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_SYMFONY_DB:-symfony}
       MYSQL_USER: ${MYSQL_SYMFONY_USER:-symfony}
       MYSQL_PASSWORD: ${MYSQL_SYMFONY_PASS:-symfony}
+    container_name: server_mysql_symfony
     ports:
       - "3307:3306"
     volumes:
@@ -30,6 +32,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DJANGO_DB:-django}
       MYSQL_USER: ${MYSQL_DJANGO_USER:-django}
       MYSQL_PASSWORD: ${MYSQL_DJANGO_PASS:-django}
+    container_name: server_mysql_django
     ports:
       - "3308:3306"
     volumes:
@@ -40,15 +43,16 @@ services:
     build:
       context: ./apps/backend-symfony
       dockerfile: Dockerfile
+    container_name: symfony_app
     environment:
       APP_ENV: dev
       DATABASE_URL: mysql://${MYSQL_SYMFONY_USER:-symfony}:${MYSQL_SYMFONY_PASS:-symfony}@mysql_symfony:3306/${MYSQL_SYMFONY_DB:-symfony}
-      REDIS_URL: redis://redis:6379/0
+      REDIS_URL: redis://redis:6380/0
+    volumes:
+      - ./apps/backend-symfony:/var/www/html
     depends_on:
       - mysql_symfony
       - redis
-    volumes:
-      - ./apps/backend-symfony:/var/www/html/symfony
     ports:
       - "8081:80"
     networks: [tracknet]
@@ -57,20 +61,21 @@ services:
     build:
       context: ./apps/backend-django
       dockerfile: Dockerfile
+    container_name: django_app
     environment:
       DJANGO_SETTINGS_MODULE: app.settings
-      DJANGO_SECRET_KEY: "dev-secret"
+      DJANGO_SECRET_KEY: "usctan6@d708c2s8"
       DB_HOST: mysql_django
       DB_PORT: 3306
       DB_NAME: ${MYSQL_DJANGO_DB:-django}
       DB_USER: ${MYSQL_DJANGO_USER:-django}
       DB_PASSWORD: ${MYSQL_DJANGO_PASS:-django}
-      REDIS_URL: redis://redis:6379/0
+      REDIS_URL: redis://redis:6380/0
+    volumes:
+      - ./apps/backend-django:/app/backend-django
     depends_on:
       - mysql_django
       - redis
-    volumes:
-      - ./apps/backend-django::/var/www/html/django
     command: gunicorn app.wsgi:application --bind 0.0.0.0:8000 --workers 3
     ports:
       - "8000:8000"
@@ -81,25 +86,13 @@ services:
       context: ./apps/frontend-angular
       dockerfile: Dockerfile
     container_name: angular_app
+    volumes:
+      - ./apps/frontend-angular:/app/frontend-angular
     depends_on:
       - symfony
       - django
-    volumes:
-      - ./apps/frontend-angular:/var/www/html/angular
     ports:
-      - "8080:80"
-    networks: [tracknet]
-
-  nginx:
-    image: nginx:1.27-alpine
-    depends_on:
-      - symfony
-      - django
-      - angular
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-    ports:
-      - "8080:80"
+      - "8082:80"
     networks: [tracknet]
 
 volumes:

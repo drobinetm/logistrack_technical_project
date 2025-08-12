@@ -25,11 +25,16 @@ class OrderStatus(models.TextChoices):
 class Driver(TimeStampedModel):
     """Represents a driver who can handle multiple orders."""
 
-    name = models.CharField(max_length=128)
-    email = models.EmailField(max_length=254, blank=True, null=True)
+    first_name = models.CharField(max_length=128)
+    last_name = models.CharField(max_length=128)
+    license_plate = models.CharField(max_length=32)
+    date_of_birth = models.DateField()
+
+    class Meta:
+        db_table = "driver"
 
     def __str__(self) -> str:
-        return f"{self.name}"
+        return f"{self.first_name} {self.last_name} ({self.license_plate})"
 
 
 class Block(TimeStampedModel):
@@ -37,6 +42,9 @@ class Block(TimeStampedModel):
 
     name = models.CharField(max_length=128, unique=True)
     description = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = "block"
 
     def __str__(self) -> str:
         return f"{self.name}"
@@ -47,6 +55,9 @@ class Product(TimeStampedModel):
 
     name = models.CharField(max_length=128)
     sku = models.CharField(max_length=64, unique=True)
+
+    class Meta:
+        db_table = "product"
 
     def __str__(self) -> str:
         return f"{self.name} ({self.sku})"
@@ -92,6 +103,9 @@ class Order(TimeStampedModel):
     status = models.CharField(
         max_length=32, choices=OrderStatus.choices, default=OrderStatus.PENDING
     )
+
+    class Meta:
+        db_table = "order"
 
     def __str__(self) -> str:
         return f"{self.code}"

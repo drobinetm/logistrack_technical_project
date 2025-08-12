@@ -2,7 +2,7 @@
 set -e
 
 echo "Waiting MySQL..."
-until nc -z mysql_django 3306; do
+until nc -z mysql 3306; do
   sleep 1
 done
 echo "MySQL Done ✅"

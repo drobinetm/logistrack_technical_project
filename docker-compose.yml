@@ -41,25 +41,25 @@ services:
 
   symfony:
     build:
-      context: ./apps/backend-symfony
+      context: ./modules/backend-symfony
       dockerfile: Dockerfile
     container_name: symfony_app
     environment:
       APP_ENV: dev
       DATABASE_URL: mysql://${MYSQL_SYMFONY_USER:-symfony}:${MYSQL_SYMFONY_PASS:-symfony}@mysql_symfony:3306/${MYSQL_SYMFONY_DB:-symfony}
-      REDIS_URL: redis://redis:6380/0
+      REDIS_URL: redis://redis:6379/0
     volumes:
-      - ./apps/backend-symfony:/var/www/html
+      - ./modules/backend-symfony:/var/www/html
     depends_on:
       - mysql_symfony
       - redis
     ports:
-      - "8081:80"
+      - "8081"
     networks: [tracknet]
 
   django:
     build:
-      context: ./apps/backend-django
+      context: ./modules/backend-django
       dockerfile: Dockerfile
     container_name: django_app
     environment:
@@ -70,29 +70,41 @@ services:
       DB_NAME: ${MYSQL_DJANGO_DB:-django}
       DB_USER: ${MYSQL_DJANGO_USER:-django}
       DB_PASSWORD: ${MYSQL_DJANGO_PASS:-django}
-      REDIS_URL: redis://redis:6380/0
+      REDIS_URL: redis://redis:6379/0
     volumes:
-      - ./apps/backend-django:/app/backend-django
+      - ./modules/backend-django:/app/backend-django
     depends_on:
       - mysql_django
       - redis
-    command: gunicorn app.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    entrypoint: ["/app/backend-django/entrypoint.sh"]
     ports:
-      - "8000:8000"
+      - "8000"
     networks: [tracknet]
 
   angular:
     build:
-      context: ./apps/frontend-angular
+      context: ./modules/frontend-angular
       dockerfile: Dockerfile
     container_name: angular_app
-    volumes:
-      - ./apps/frontend-angular:/app/frontend-angular
     depends_on:
       - symfony
       - django
     ports:
-      - "8082:80"
+      - "4200:80"
+    networks: [tracknet]
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    volumes:
+      - ./modules/frontend-angular/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - angular
+      - django
+      - symfony
+    restart: always
     networks: [tracknet]
 
 volumes:

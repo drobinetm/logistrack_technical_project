@@ -1,0 +1,35 @@
+[
+{
+  "model": "service_app.driver",
+  "fields": {
+    "created_at": "2025-08-13T19:59:47Z",
+    "updated_at": "2025-08-13T19:59:47Z",
+    "first_name": "Juan",
+    "last_name": "Pérez",
+    "license_plate": "ABC-123",
+    "date_of_birth": "1990-05-12"
+  }
+},
+{
+  "model": "service_app.driver",
+  "fields": {
+    "created_at": "2025-08-13T19:59:47Z",
+    "updated_at": "2025-08-13T19:59:47Z",
+    "first_name": "María",
+    "last_name": "González",
+    "license_plate": "XYZ-789",
+    "date_of_birth": "1987-11-03"
+  }
+},
+{
+  "model": "service_app.driver",
+  "fields": {
+    "created_at": "2025-08-13T19:59:47Z",
+    "updated_at": "2025-08-13T19:59:47Z",
+    "first_name": "Carlos",
+    "last_name": "Ramírez",
+    "license_plate": "JKL-456",
+    "date_of_birth": "1995-02-21"
+  }
+}
+]

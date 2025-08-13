@@ -1,0 +1,38 @@
+[
+{
+  "model": "service_app.product",
+  "fields": {
+    "created_at": "2025-08-13T19:59:47Z",
+    "updated_at": "2025-08-13T19:59:47Z",
+    "name": "Café molido",
+    "sku": "CAF-001"
+  }
+},
+{
+  "model": "service_app.product",
+  "fields": {
+    "created_at": "2025-08-13T19:59:47Z",
+    "updated_at": "2025-08-13T19:59:47Z",
+    "name": "Azúcar blanca",
+    "sku": "AZU-002"
+  }
+},
+{
+  "model": "service_app.product",
+  "fields": {
+    "created_at": "2025-08-13T19:59:47Z",
+    "updated_at": "2025-08-13T19:59:47Z",
+    "name": "Arroz premium",
+    "sku": "ARR-003"
+  }
+},
+{
+  "model": "service_app.product",
+  "fields": {
+    "created_at": "2025-08-13T19:59:47Z",
+    "updated_at": "2025-08-13T19:59:47Z",
+    "name": "Harina de trigo",
+    "sku": "HAR-004"
+  }
+}
+]

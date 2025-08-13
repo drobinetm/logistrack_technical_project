@@ -13,8 +13,8 @@ class OrderDTO(CamelModel):
     code: str
     origin: str
     destination: str
-    user: str
-    status: str
+    user: Optional[str] = None
+    status: Optional[str] = None
     driver: Optional[DriverDTO] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
@@ -22,5 +22,5 @@ class OrderDTO(CamelModel):
     volume: Optional[float] = None
     weight: Optional[float] = None
     incidents: Optional[str] = None
-    number_of_bags: int = Field(..., alias="numberOfBags")
+    number_of_bags: Optional[int] = 0
     products: List[ProductDTO] = []

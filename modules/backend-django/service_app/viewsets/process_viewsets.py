@@ -14,8 +14,10 @@ from rest_framework.response import Response
 
 from ..helpers.dto_helper import (
     build_consolidation_group,
+    dispatch_order_to_dict,
     distribution_order_to_dto,
     order_to_dto,
+    preparation_order_to_dict,
     preparation_order_to_dto,
 )
 from ..helpers.enum_helper import get_order_status
@@ -104,46 +106,37 @@ class DispatchViewSet(BaseOrderListViewSet):
                     {
                         "id": 10,
                         "code": "ORD-001",
-                        "driver": {
-                            "id": 5,
-                            "firstName": "Juan",
-                            "lastName": "Pérez",
-                            "licensePlate": "ABC123",
-                            "dateOfBirth": "1990-01-01",
-                        },
                         "origin": "SME A",
                         "destination": "DC 1",
                         "latitude": 12.34,
                         "longitude": -56.78,
                         "dispatchDate": "2025-08-12T10:00:00Z",
-                        "user": "operador",
-                        "volume": 1.5,
-                        "weight": 20.0,
-                        "incidents": None,
-                        "numberOfBags": 3,
                         "status": "EN_DESPACHO",
-                        "products": [{"id": 2, "name": "Caja", "sku": "CAJ-01"}],
                     }
                 ],
             )
         ],
     )
     def list(self, request: Request, *args, **kwargs) -> Response:
-        data = [order_to_dto(o).model_dump(by_alias=True) for o in self.get_queryset()]
+        data = [
+            dispatch_order_to_dict(order_to_dto(o).model_dump(by_alias=True))
+            for o in self.get_queryset()
+        ]
+
         return Response(data)
 
 
 class PreparationViewSet(BaseOrderListViewSet):
-    """Prepared orders with products and weight/volume status (default: APPROVED)."""
+    """Prepared orders with products and weight/volume status (default: PENDING)."""
 
     def get_queryset(self):
-        filters = self._build_filters(self.request) & Q(status="APPROVED")
+        filters = self._build_filters(self.request) & Q(status="PENDING")
         return self.get_base_queryset(filters)
 
     @extend_schema(
         tags=["Procesos"],
         summary="Visualizar las órdenes preparadas, con productos y estado de peso/volumen.",
-        description="Lista pedidos preparados (APPROVED) con indicadores de peso/volumen.",
+        description="Lista pedidos preparados (PENDING) con indicadores de peso/volumen.",
         parameters=[
             OpenApiParameter(
                 name="date",
@@ -179,17 +172,9 @@ class PreparationViewSet(BaseOrderListViewSet):
                     {
                         "id": 11,
                         "code": "ORD-002",
-                        "driver": {
-                            "id": 6,
-                            "firstName": "María",
-                            "lastName": "López",
-                            "licensePlate": "XYZ987",
-                            "dateOfBirth": "1988-05-10",
-                        },
                         "origin": "SME B",
                         "destination": "DC 2",
                         "dispatchDate": "2025-08-12T12:00:00Z",
-                        "user": "operador",
                         "numberOfBags": 2,
                         "status": "APROBADO",
                         "products": [{"id": 3, "name": "Bolsa", "sku": "BLS-10"}],
@@ -202,17 +187,18 @@ class PreparationViewSet(BaseOrderListViewSet):
     )
     def list(self, request: Request, *args, **kwargs) -> Response:
         data = [
-            preparation_order_to_dto(o).model_dump(by_alias=True)
+            preparation_order_to_dict(order_to_dto(o).model_dump(by_alias=True))
             for o in self.get_queryset()
         ]
+
         return Response(data)
 
 
 class ShippingViewSet(BaseOrderListViewSet):
-    """Orders ready to ship (default: READY_TO_SHIP)."""
+    """Orders ready to ship (default: COMPLETED)."""
 
     def get_queryset(self):
-        filters = self._build_filters(self.request) & Q(status="READY_TO_SHIP")
+        filters = self._build_filters(self.request) & Q(status="COMPLETED")
         return self.get_base_queryset(filters)
 
     @extend_schema(
@@ -279,10 +265,10 @@ class ShippingViewSet(BaseOrderListViewSet):
 
 
 class ReceivingViewSet(BaseOrderListViewSet):
-    """Receipt at DC; show incidents (default: READY_TO_DELIVER)."""
+    """Receipt at DC; show incidents (default: READY_TO_SHIP)."""
 
     def get_queryset(self):
-        filters = self._build_filters(self.request) & Q(status="READY_TO_DELIVER")
+        filters = self._build_filters(self.request) & Q(status="READY_TO_SHIP")
         return self.get_base_queryset(filters)
 
     @extend_schema(
@@ -357,8 +343,7 @@ class ConsolidationViewSet(BaseOrderListViewSet):
     """Group orders by driver and block; return completion status counts."""
 
     def get_queryset(self):
-        # Consider all statuses unless filtered
-        filters = self._build_filters(self.request)
+        filters = self._build_filters(self.request) & Q(status="APPROVED")
         return self.get_base_queryset(filters)
 
     @extend_schema(

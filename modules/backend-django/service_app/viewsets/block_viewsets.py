@@ -12,10 +12,10 @@ from rest_framework import mixins, permissions, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from .dtos import block_to_dto
-from .helpers.enum_helper import get_order_status
-from .models import Block, Order
-from .serializers import BlockDistributionSerializer
+from ..helpers.dto_helper import block_to_dto
+from ..helpers.enum_helper import get_order_status
+from ..models import Block, Order
+from ..serializers import BlockDistributionSerializer
 
 
 class BlockDistributionViewSet(

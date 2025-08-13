@@ -12,14 +12,14 @@ from rest_framework import mixins, permissions, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from .dtos import (
+from ..helpers.dto_helper import (
     build_consolidation_group,
     distribution_order_to_dto,
     order_to_dto,
     preparation_order_to_dto,
 )
-from .helpers.enum_helper import get_order_status
-from .models import Order
+from ..helpers.enum_helper import get_order_status
+from ..models import Order
 
 
 class BaseOrderListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):

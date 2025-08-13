@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Entity\Traits\TimeStampTrait;
 use App\Repository\DriverRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -29,13 +30,13 @@ class Driver
     private string $licensePlate;
 
     #[ORM\Column(type: 'date_immutable')]
-    private \DateTimeImmutable $dateOfBirth;
+    private DateTimeImmutable $dateOfBirth;
 
     /** @var Collection<int, Order> */
     #[ORM\OneToMany(mappedBy: 'driver', targetEntity: Order::class)]
     private Collection $orders;
 
-    public function __construct(string $firstName, string $lastName, string $licensePlate, \DateTimeImmutable $dateOfBirth)
+    public function __construct(string $firstName, string $lastName, string $licensePlate, DateTimeImmutable $dateOfBirth)
     {
         $this->firstName = $firstName;
         $this->lastName = $lastName;
@@ -55,8 +56,8 @@ class Driver
     public function getLicensePlate(): string { return $this->licensePlate; }
     public function setLicensePlate(string $licensePlate): self { $this->licensePlate = $licensePlate; return $this; }
 
-    public function getDateOfBirth(): \DateTimeImmutable { return $this->dateOfBirth; }
-    public function setDateOfBirth(\DateTimeImmutable $dob): self { $this->dateOfBirth = $dob; return $this; }
+    public function getDateOfBirth(): DateTimeImmutable { return $this->dateOfBirth; }
+    public function setDateOfBirth(DateTimeImmutable $dob): self { $this->dateOfBirth = $dob; return $this; }
 
     /**
      * @return Collection<int, Order>

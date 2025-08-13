@@ -3,8 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\RedisOutboxRepository;
-use Doctrine\DBAL\Types\Types;
+use DateTimeImmutable;
+use DateTimeZone;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 
 #[ORM\Entity(repositoryClass: RedisOutboxRepository::class)]
 class RedisOutbox
@@ -21,16 +23,19 @@ class RedisOutbox
     private string $payload;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $createdAt;
+    private DateTimeImmutable $createdAt;
 
     #[ORM\Column(type: 'boolean', options: ['default' => 0])]
     private bool $published = false;
 
+    /**
+     * @throws Exception
+     */
     public function __construct(string $eventType, string $payload)
     {
         $this->eventType = $eventType;
         $this->payload = $payload;
-        $this->createdAt = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        $this->createdAt = new DateTimeImmutable('now', new DateTimeZone('UTC'));
     }
 
     public function getId(): ?int
@@ -43,7 +48,7 @@ class RedisOutbox
         return $this->eventType;
     }
 
-    public function getCreatedAt(): \DateTimeImmutable
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }

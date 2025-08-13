@@ -21,7 +21,7 @@ class OrderFactory
             code: $dto->code,
             origin: $dto->origin,
             destination: $dto->destination,
-            user: $dto->user,
+            user: $dto->user ?? null,
         );
 
         $order

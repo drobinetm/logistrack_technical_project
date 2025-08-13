@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Entity\Traits\TimeStampTrait;
 use App\Enum\OrderStatus;
 use App\Repository\OrderRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -25,11 +26,11 @@ class Order
     private string $code;
 
     #[ORM\ManyToOne(targetEntity: Driver::class, inversedBy: 'orders')]
-    #[ORM\JoinColumn(onDelete: 'SET NULL', nullable: true)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Driver $driver = null;
 
     #[ORM\ManyToOne(targetEntity: Block::class, inversedBy: 'orders')]
-    #[ORM\JoinColumn(onDelete: 'SET NULL', nullable: true)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Block $block = null;
 
     /** @var Collection<int, Product> */
@@ -43,17 +44,17 @@ class Order
     #[ORM\Column(length: 255)]
     private string $destination;
 
-    #[ORM\Column(type: 'decimal', precision: 9, scale: 6, nullable: true)]
-    private ?string $latitude = null;
+    #[ORM\Column(type: 'decimal', precision: 9, scale: 6, nullable: false)]
+    private string $latitude;
 
-    #[ORM\Column(type: 'decimal', precision: 9, scale: 6, nullable: true)]
-    private ?string $longitude = null;
+    #[ORM\Column(type: 'decimal', precision: 9, scale: 6, nullable: false)]
+    private string $longitude;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private ?\DateTimeImmutable $dispatchDate = null;
+    private ?DateTimeImmutable $dispatchDate = null;
 
-    #[ORM\Column(length: 128)]
-    private string $user;
+    #[ORM\Column(length: 128, nullable: true)]
+    private ?string $user;
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true, options: ['comment' => 'Cubic volume'])]
     private ?string $volume = null;
@@ -67,10 +68,10 @@ class Order
     #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private int $numberOfBags = 0;
 
-    #[ORM\Column(type: 'string', enumType: OrderStatus::class, length: 32)]
-    private OrderStatus $status = OrderStatus::PENDING;
+    #[ORM\Column(type: 'string', length: 32, enumType: OrderStatus::class)]
+    private OrderStatus $status = OrderStatus::IN_DISPATCH;
 
-    public function __construct(string $code, string $origin, string $destination, string $user)
+    public function __construct(string $code, string $origin, string $destination, ?string $user)
     {
         $this->code = $code;
         $this->origin = $origin;
@@ -121,11 +122,11 @@ class Order
     public function getLongitude(): ?string { return $this->longitude; }
     public function setLongitude(?string $longitude): self { $this->longitude = $longitude; return $this; }
 
-    public function getDispatchDate(): ?\DateTimeImmutable { return $this->dispatchDate; }
-    public function setDispatchDate(?\DateTimeImmutable $dispatchDate): self { $this->dispatchDate = $dispatchDate; return $this; }
+    public function getDispatchDate(): ?DateTimeImmutable { return $this->dispatchDate; }
+    public function setDispatchDate(?DateTimeImmutable $dispatchDate): self { $this->dispatchDate = $dispatchDate; return $this; }
 
-    public function getUser(): string { return $this->user; }
-    public function setUser(string $user): self { $this->user = $user; return $this; }
+    public function getUser(): ?string { return $this->user; }
+    public function setUser(?string $user): self { $this->user = $user; return $this; }
 
     public function getVolume(): ?string { return $this->volume; }
     public function setVolume(?string $volume): self { $this->volume = $volume; return $this; }

@@ -87,7 +87,7 @@ WSGI_APPLICATION = "app.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": os.getenv("DB_NAME", "logis_track_db"),
+        "NAME": os.getenv("DB_NAME", "logis_track_django"),
         "USER": os.getenv("DB_USER", "userdb"),
         "PASSWORD": os.getenv("DB_PASSWORD", "password_db"),
         "HOST": os.getenv("DB_HOST", "mysql"),

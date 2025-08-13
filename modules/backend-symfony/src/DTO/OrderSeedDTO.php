@@ -3,6 +3,7 @@
 namespace App\DTO;
 
 use App\Enum\OrderStatus;
+use DateTimeImmutable;
 
 class OrderSeedDTO
 {
@@ -10,18 +11,18 @@ class OrderSeedDTO
         public string $code,
         public string $origin,
         public string $destination,
-        public ?string $latitude,
-        public ?string $longitude,
-        public ?\DateTimeImmutable $dispatchDate,
-        public string $user,
-        public ?string $volume,
-        public ?string $weight,
-        public ?string $incidents,
-        public int $numberOfBags,
-        public OrderStatus $status,
-        public ?string $driverRef,
-        public ?string $blockRef,
+        public string $latitude,
+        public string $longitude,
+        public ?DateTimeImmutable $dispatchDate = null,
+        public ?string $user = null,
+        public ?string $volume = null,
+        public ?string $weight = null,
+        public ?string $incidents = null,
+        public ?int $numberOfBags = 0,
+        public ?OrderStatus $status = OrderStatus::IN_DISPATCH,
+        public ?string $driverRef = null,
+        public ?string $blockRef = null,
         /** @var string[] */
-        public array $productRefs = [],
+        public ?array $productRefs = [],
     ) {}
 }

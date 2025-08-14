@@ -92,9 +92,18 @@ class Order
     public function setBlock(?Block $block): self { $this->block = $block; return $this; }
 
     /**
+     * @return array<int> Array of product IDs
+     */
+    public function getProductIds(): array {
+        return $this->products->map(fn(Product $product) => $product->getId())->toArray();
+    }
+
+    /**
      * @return Collection<int, Product>
      */
-    public function getProducts(): Collection { return $this->products; }
+    public function getProductsCollection(): Collection {
+        return $this->products;
+    }
 
     public function addProduct(Product $product): self
     {
@@ -142,4 +151,25 @@ class Order
 
     public function getStatus(): OrderStatus { return $this->status; }
     public function setStatus(OrderStatus $status): self { $this->status = $status; return $this; }
+
+    /**
+     * Get the payload for the consolidated order in the format expected by the consolidation service.
+     *
+     * @return array{
+     *     order_id: int,
+     *     block_id: int,
+     *     driver_id: int,
+     *     products: array<Product>,
+     *     dispatch_date: string,
+     * }
+     */
+    public function getConsolidatedOrderPayload(): array {
+        return [
+            "order_id" => $this->getId(),
+            "block_id" => $this->getBlock()->getId(),
+            "driver_id" => $this->getDriver()->getId(),
+            "products" => $this->getProductIds(),
+            "dispatch_date" => $this->getDispatchDate()->format('Y-m-d H:i:s'),
+        ];
+    }
 }

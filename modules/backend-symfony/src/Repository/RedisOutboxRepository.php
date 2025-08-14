@@ -5,6 +5,8 @@ namespace App\Repository;
 use App\Entity\RedisOutbox;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use JsonException;
+
 
 /**
  * @extends ServiceEntityRepository<RedisOutbox>
@@ -16,28 +18,30 @@ class RedisOutboxRepository extends ServiceEntityRepository
         parent::__construct($registry, RedisOutbox::class);
     }
 
-//    /**
-//     * @return RedisOutbox[] Returns an array of RedisOutbox objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('r')
-//            ->andWhere('r.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('r.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Get all order IDs that have been published
+     *
+     * @return int[] Array of order IDs
+     * @throws JsonException
+     */
+    public function findOrderPublishedIdsFromPayloads(): array
+    {
+        $orderIds = [];
 
-//    public function findOneBySomeField($value): ?RedisOutbox
-//    {
-//        return $this->createQueryBuilder('r')
-//            ->andWhere('r.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        $outboxes = $this->findBy(["published" => true]);
+
+        foreach ($outboxes as $outbox) {
+            $payload = json_decode($outbox->getPayload(), true, 512, JSON_THROW_ON_ERROR);
+
+            if (isset($payload['order_id']) && is_numeric($payload['order_id'])) {
+                $orderId = (int)$payload['order_id'];
+
+                if (!in_array($orderId, $orderIds, true)) {
+                    $orderIds[] = $orderId;
+                }
+            }
+        }
+
+        return $orderIds;
+    }
 }

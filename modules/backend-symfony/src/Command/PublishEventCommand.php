@@ -59,8 +59,12 @@ class PublishEventCommand extends Command
                 continue;
             }
 
-            // Add the order to the list of choices
             $choices[] = "{$order->getId()} - Bloque: {$order->getBlock()->getName()} - Origen: {$order->getOrigin()} - Destino: {$order->getDestination()}";
+        }
+
+        if (!count($choices)) {
+            $output->writeln('<error>No existen bloques consolidados para publicar</error>');
+            return Command::FAILURE;
         }
 
         // Create a question and ask the user for input

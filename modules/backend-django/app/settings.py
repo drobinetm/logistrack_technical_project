@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "jazzmin",
     "service_app",
     "corsheaders",
+    "django_q",
 ]
 
 MIDDLEWARE = [
@@ -159,9 +160,11 @@ REST_FRAMEWORK = {
 # drf-spectacular settings (optional polish)
 SPECTACULAR_SETTINGS = {
     "TITLE": "Logistrack API",
-    "DESCRIPTION": "API de ciclos de vida de pedidos (Despacho, Preparación, Envío, Recepción, Consolidación, Distribución).",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "DESCRIPTION": (
+        "API de ciclos de vida de pedidos (Despacho, Preparación, Envío, Recepción, Consolidación, Distribución)."
+    ),
 }
 
 # Django Cors Headers
@@ -178,3 +181,20 @@ CORS_ALLOW_METHODS = (
     "POST",
     "PUT",
 )
+
+#  Django-Q for queue with redis
+Q_CLUSTER = {
+    "name": "backend-django-Q",
+    "workers": 4,
+    "timeout": 90,
+    "retry": 120,
+    "compress": True,
+    "orm": "default",
+    "redis": {
+        "host": os.getenv("REDIS_URL", "redis"),
+        "port": 6379,
+        "db": 0,
+    },
+}
+
+SILENCED_SYSTEM_CHECKS = ["models.W037"]

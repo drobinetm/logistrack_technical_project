@@ -1,9 +1,10 @@
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import Field
 
 from .camel_case_dto import CamelModel
 from .driver_model__dto import DriverDTO
+from .order_model_dto import OrderDTO
 
 
 class ConsolidationGroupDTO(CamelModel):
@@ -19,3 +20,4 @@ class ConsolidationGroupDTO(CamelModel):
     in_dispatch: int = Field(..., alias="inDispatch")
     ready_to_ship: int = Field(..., alias="readyToShip")
     ready_to_deliver: int = Field(..., alias="readyToDeliver")
+    orders: List[OrderDTO] = Field(default_factory=list)

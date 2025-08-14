@@ -18,7 +18,6 @@ from ..helpers.dto_helper import (
     distribution_order_to_dto,
     order_to_dto,
     preparation_order_to_dict,
-    preparation_order_to_dto,
 )
 from ..helpers.enum_helper import get_order_status
 from ..models import Order
@@ -401,6 +400,27 @@ class ConsolidationViewSet(BaseOrderListViewSet):
                         "inDispatch": 2,
                         "readyToShip": 1,
                         "readyToDeliver": 2,
+                        "orders": [
+                            {
+                                "id": 14,
+                                "code": "ORD-005",
+                                "driver": {
+                                    "id": 8,
+                                    "firstName": "Ana",
+                                    "lastName": "Ruiz",
+                                    "licensePlate": "GHI789",
+                                    "dateOfBirth": "1992-09-15",
+                                },
+                                "origin": "DC 3",
+                                "destination": "Cliente Final",
+                                "dispatchDate": "2025-08-12T16:00:00Z",
+                                "user": "operador",
+                                "numberOfBags": 1,
+                                "status": "APROVADO",
+                                "products": [],
+                                "confirmation": True,
+                            }
+                        ],
                     }
                 ],
             )
@@ -431,7 +451,16 @@ class DistributionOrdersViewSet(BaseOrderListViewSet):
         filters = self._build_filters(self.request) & Q(
             status__in=["DELIVERED", "PENDING", "REJECTED"]
         )
-        return self.get_base_queryset(filters)
+        queryset = self.get_base_queryset(filters)
+
+        # For PENDING orders, ensure user and driver are not null
+        pending_orders = Q(status="PENDING")
+        has_user_and_driver = Q(user__isnull=False) & Q(driver__isnull=False)
+
+        # Only include PENDING orders that have both user and driver
+        valid_pending_orders = ~pending_orders | (pending_orders & has_user_and_driver)
+
+        return queryset.filter(valid_pending_orders)
 
     @extend_schema(
         tags=["Procesos"],

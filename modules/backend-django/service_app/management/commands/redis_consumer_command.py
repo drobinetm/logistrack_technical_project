@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from app.consumers.redis_stream_consumer import run
+from ...services.redis_consumer_service import run
 
 
 class Command(BaseCommand):

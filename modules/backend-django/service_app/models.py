@@ -30,6 +30,8 @@ class Driver(TimeStampedModel):
     license_plate = models.CharField(max_length=32)
     date_of_birth = models.DateField()
 
+    objects = models.Manager()
+
     class Meta:
         db_table = "driver"
 
@@ -43,6 +45,8 @@ class Block(TimeStampedModel):
     name = models.CharField(max_length=128, unique=True)
     description = models.TextField(blank=True, null=True)
 
+    objects = models.Manager()
+
     class Meta:
         db_table = "block"
 
@@ -55,6 +59,8 @@ class Product(TimeStampedModel):
 
     name = models.CharField(max_length=128)
     sku = models.CharField(max_length=64, unique=True)
+
+    objects = models.Manager()
 
     class Meta:
         db_table = "product"
@@ -87,7 +93,7 @@ class Order(TimeStampedModel):
         max_digits=9, decimal_places=6, blank=True, null=True
     )
     dispatch_date = models.DateTimeField(blank=True, null=True)
-    user = models.CharField(max_length=128)
+    user = models.CharField(max_length=128, blank=True, null=True)
     volume = models.DecimalField(
         max_digits=10, decimal_places=2, help_text="Cubic volume", blank=True, null=True
     )
@@ -104,8 +110,24 @@ class Order(TimeStampedModel):
         max_length=32, choices=OrderStatus.choices, default=OrderStatus.PENDING
     )
 
+    objects = models.Manager()
+
     class Meta:
         db_table = "order"
 
     def __str__(self) -> str:
         return f"{self.code}"
+
+
+class RedisOutbox(TimeStampedModel):
+    """Table to save the history for redis."""
+
+    event_id = models.CharField(max_length=64, unique=True)
+    event_type = models.CharField(max_length=64)
+    payload = models.JSONField()
+    received = models.BooleanField(default=False)
+
+    objects = models.Manager()
+
+    class Meta:
+        db_table = "redis_outbox"

@@ -6,6 +6,7 @@ from .viewsets.block_viewsets import BlockDistributionViewSet
 from .viewsets.process_viewsets import (
     ConsolidationViewSet,
     DispatchViewSet,
+    DistributionOrdersViewSet,
     PreparationViewSet,
     ReceivingViewSet,
     ShippingViewSet,
@@ -19,10 +20,11 @@ router.register(r"preparacion", PreparationViewSet, basename="preparation")
 router.register(r"envio", ShippingViewSet, basename="shipping")
 router.register(r"recepcion", ReceivingViewSet, basename="receiving")
 router.register(r"consolidacion", ConsolidationViewSet, basename="consolidation")
+router.register(r"distribucion", DistributionOrdersViewSet, basename="distribution")
 
 # Block's endpoints
 router.register(
-    r"distribucion/bloques", BlockDistributionViewSet, basename="distribution"
+    r"distribucion/bloques", BlockDistributionViewSet, basename="distribution-blocks"
 )
 
 urlpatterns = [

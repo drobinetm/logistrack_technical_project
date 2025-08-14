@@ -65,6 +65,9 @@ def build_consolidation_group(driver, block, orders: List) -> ConsolidationGroup
     def count(status: str) -> int:
         return sum(1 for o in orders if getattr(o, "status", None) == status)
 
+    # Convert orders to DTOs
+    order_dtos = [order_to_dto(order) for order in orders]
+
     return ConsolidationGroupDTO(
         driver=driver_to_dto(driver) if driver else None,
         blockId=block.id if block else None,
@@ -78,6 +81,7 @@ def build_consolidation_group(driver, block, orders: List) -> ConsolidationGroup
         inDispatch=count("IN_DISPATCH"),
         readyToShip=count("READY_TO_SHIP"),
         readyToDeliver=count("READY_TO_DELIVER"),
+        orders=order_dtos,
     )
 
 

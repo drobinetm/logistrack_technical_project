@@ -38,41 +38,25 @@ class BlockDistributionViewSet(
 
     def get_queryset(self):
         request: Request = self.request
-        date_str: Optional[str] = request.query_params.get("date")
-        driver_id: Optional[str] = request.query_params.get("driver")
-        status: Optional[str] = request.query_params.get("status")
 
-        order_filters = Q()
+        # Get base queryset
+        queryset = Block.objects.all().order_by("name")
 
-        # Filter by date (match date portion of dispatch_date)
-        if date_str:
-            try:
-                target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-                order_filters &= Q(dispatch_date__date=target_date)
-            except ValueError:
-                # Ignore bad date; return no orders by making filter impossible
-                order_filters &= Q(pk__isnull=True)
+        # Apply filters to request
+        filtered_orders = self._apply_filter_to_queryset(request=request)
 
-        if driver_id:
-            order_filters &= Q(driver_id=driver_id)
+        if filtered_orders is not None:
+            # Only include blocks that have matching orders
+            queryset = (
+                queryset.prefetch_related(Prefetch("orders", queryset=filtered_orders))
+                .filter(orders__in=filtered_orders)
+                .distinct()
+            )
+        else:
+            orders = Order.objects.order_by("dispatch_date", "id")
 
-        if status:
-            order_filters &= Q(status=status)
-
-        filtered_orders = (
-            Order.objects.select_related("driver")
-            .prefetch_related("products")
-            .filter(order_filters)
-            .order_by("dispatch_date", "id")
-        )
-
-        # Only include blocks which have at least one matching order
-        queryset = (
-            Block.objects.prefetch_related(Prefetch("orders", queryset=filtered_orders))
-            .filter(orders__in=filtered_orders)
-            .distinct()
-            .order_by("name")
-        )
+            # If no filters, just prefetch all orders for all blocks
+            queryset = queryset.prefetch_related(Prefetch("orders", queryset=orders))
 
         return queryset
 
@@ -170,3 +154,39 @@ class BlockDistributionViewSet(
         instance = self.get_object()
         dto = block_to_dto(instance)
         return Response(dto.model_dump(by_alias=True))
+
+    @staticmethod
+    def _apply_filter_to_queryset(request):
+        date_str: Optional[str] = request.query_params.get("date")
+        driver_id: Optional[str] = request.query_params.get("driver")
+        status: Optional[str] = request.query_params.get("status")
+
+        # Start with all orders if no filters are provided
+        order_filters = Q()
+
+        has_filters = False
+
+        # Apply filters only if they are provided
+        if date_str:
+            target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+            order_filters &= Q(dispatch_date__date=target_date)
+            has_filters = True
+
+        if driver_id:
+            order_filters &= Q(driver_id=driver_id)
+            has_filters = True
+
+        if status:
+            order_filters &= Q(status=status)
+            has_filters = True
+
+        # Only apply order filters if any filter was provided
+        if has_filters:
+            return (
+                Order.objects.select_related("driver")
+                .prefetch_related("products")
+                .filter(order_filters)
+                .order_by("dispatch_date", "id")
+            )
+
+        return None

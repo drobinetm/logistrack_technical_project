@@ -10,10 +10,14 @@ framework:
             # sync: 'sync://'
             events_stream:
                 dsn: '%env(REDIS_URL)%'
+                serializer: messenger.transport.symfony_serializer
                 options:
                     stream: events_stream
                     consumer: symfony_publisher
                     group: main_group
+
+        serializer:
+            default_serializer: messenger.transport.symfony_serializer
 
         routing:
             # Route your messages to the transports

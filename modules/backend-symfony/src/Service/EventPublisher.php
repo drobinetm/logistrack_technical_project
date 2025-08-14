@@ -42,8 +42,9 @@ readonly class EventPublisher
      */
     public function publish(string $type, array $data): void
     {
-        // Publish the event
         $message = new EventMessage($type, $data);
+
+        // Publish the event
         $this->bus->dispatch($message);
 
         // Mark the event as published

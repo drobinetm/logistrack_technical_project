@@ -1,0 +1,119 @@
+<div class="preparacion-container">
+  <div class="header">
+    <h1>Lista de Preparación de Órdenes</h1>
+    <div class="header-stats">
+      <div class="stat">
+        <span class="stat-number">{{ completedOrders }}</span>
+        <span class="stat-label">Completados</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">{{ pendingOrders }}</span>
+        <span class="stat-label">Pendientes</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">{{ overallProgress }}%</span>
+        <span class="stat-label">Progreso General</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters-form">
+        <mat-form-field appearance="outline" class="status-filter">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="status">
+            <mat-option value="">Todos</mat-option>
+            <mat-option value="pendiente">Pendiente</mat-option>
+            <mat-option value="en_proceso">En Proceso</mat-option>
+            <mat-option value="completado">Completado</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="date-filter">
+          <mat-label>Fecha de Despacho</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="dateFilter">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <button mat-icon-button matSuffix *ngIf="filterForm.get('dateFilter')?.value" (click)="clearDateFilter()" class="clear-date">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
+      </form>
+      <div class="filter-actions">
+        <button mat-stroked-button type="button" (click)="clearFilters()" class="clear-button">
+          <mat-icon>clear</mat-icon>
+          Limpiar Filtros
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Order Cards Grid -->
+  <div class="orders-grid">
+    <mat-card *ngFor="let order of filteredOrders" class="order-card"
+              [class.completed]="order.status === 'completado'"
+              [class.in-progress]="order.status === 'en_proceso'"
+              [class.pending]="order.status === 'pendiente'">
+      <mat-card-header>
+        <mat-card-title class="order-title">
+          <span>{{ order.code || 'N/A' }}</span>
+          <mat-chip [class]="'status-' + order.status">
+            <mat-icon>{{ getStatusIcon(order.status) }}</mat-icon>
+            {{ getStatusText(order.status) }}
+          </mat-chip>
+        </mat-card-title>
+        <mat-card-subtitle>{{ order.destination }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="order-details">
+          <div class="detail-item">
+            <mat-icon>schedule</mat-icon>
+            <span>{{ order.dispatchDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detail-item">
+            <mat-icon>scale</mat-icon>
+            <span>{{ order.weight || 0 }} kg</span>
+          </div>
+          <div class="detail-item">
+            <mat-icon>cube</mat-icon>
+            <span>{{ order.volume || 0 }} m³</span>
+          </div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-header">
+            <span>Progreso de preparación</span>
+            <span class="progress-percentage">{{ getOrderProgress(order) }}%</span>
+          </div>
+          <mat-progress-bar
+            mode="determinate"
+            [value]="getOrderProgress(order)"
+            [color]="getProgressColor(order)">
+          </mat-progress-bar>
+        </div>
+
+        <!-- Products List -->
+        <div class="products-section">
+          <h4>Productos:</h4>
+          <div class="product-item" *ngFor="let product of order.products">
+            <mat-icon>inventory_2</mat-icon>
+            <div class="product-details">
+              <span class="product-name">{{ product.Name }}</span>
+              <span class="product-sku">{{ product.Sku }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="filteredOrders.length === 0">
+    <mat-icon>inventory</mat-icon>
+    <h2>No hay órdenes para mostrar</h2>
+    <p>Ajusta los filtros o espera nuevas órdenes de preparación.</p>
+  </div>
+</div>

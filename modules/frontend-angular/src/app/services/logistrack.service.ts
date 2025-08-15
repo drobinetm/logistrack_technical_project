@@ -9,67 +9,72 @@ import {
   ReceptionOrder,
   ConsolidationGroup,
   DistributionOrder,
-  OrderFilters
+  OrderFilters,
 } from '../interfaces';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LogisTrackService {
   private readonly baseUrl = 'http://localhost:8000/api';
 
   constructor(private http: HttpClient) {}
 
-  //#region Dispatch Orders
-  getDispatchOrders(filters?: Partial<OrderFilters>): Observable<ApiResponse<DispatchOrder[]>> {
+  // Get dispatch orders with optional filters
+  public getDispatchOrders(
+    filters?: Partial<OrderFilters>
+  ): Observable<ApiResponse<DispatchOrder[]>> {
     const params = this.buildQueryParams(filters);
     return this.http.get<ApiResponse<DispatchOrder[]>>(`${this.baseUrl}/despacho/`, { params });
   }
 
-  getDispatchOrderById(id: string | number): Observable<ApiResponse<DispatchOrder>> {
-    return this.http.get<ApiResponse<DispatchOrder>>(`${this.baseUrl}/despacho/${id}/`);
-  }
-  //#endregion
-
-  //#region Preparation Orders
-  getPreparationOrders(filters?: Partial<OrderFilters>): Observable<ApiResponse<PreparationOrder[]>> {
+  // Get preparation orders with optional filters
+  public getPreparationOrders(
+    filters?: Partial<OrderFilters>
+  ): Observable<ApiResponse<PreparationOrder[]>> {
     const params = this.buildQueryParams(filters);
-    return this.http.get<ApiResponse<PreparationOrder[]>>(`${this.baseUrl}/preparacion/`, { params });
+    return this.http.get<ApiResponse<PreparationOrder[]>>(`${this.baseUrl}/preparacion/`, {
+      params,
+    });
   }
-  //#endregion
 
-  //#region Shipping Orders
-  getShippingOrders(filters?: Partial<OrderFilters>): Observable<ApiResponse<ShippingOrder[]>> {
+  // Get shipping orders with optional filters
+  public getShippingOrders(
+    filters?: Partial<OrderFilters>
+  ): Observable<ApiResponse<ShippingOrder[]>> {
     const params = this.buildQueryParams(filters);
     return this.http.get<ApiResponse<ShippingOrder[]>>(`${this.baseUrl}/envio/`, { params });
   }
-  //#endregion
 
-  //#region Reception Orders
-  getReceptionOrders(filters?: Partial<OrderFilters>): Observable<ApiResponse<ReceptionOrder[]>> {
+  // Get reception orders with optional filters
+  public getReceptionOrders(
+    filters?: Partial<OrderFilters>
+  ): Observable<ApiResponse<ReceptionOrder[]>> {
     const params = this.buildQueryParams(filters);
     return this.http.get<ApiResponse<ReceptionOrder[]>>(`${this.baseUrl}/recepcion/`, { params });
   }
-  //#endregion
 
-  //#region Consolidation
-  getConsolidationGroups(filters?: Partial<OrderFilters>): Observable<ApiResponse<ConsolidationGroup[]>> {
+  // Get consolidation orders with optional filters
+  public getConsolidationGroups(
+    filters?: Partial<OrderFilters>
+  ): Observable<ApiResponse<ConsolidationGroup[]>> {
     const params = this.buildQueryParams(filters);
-    return this.http.get<ApiResponse<ConsolidationGroup[]>>(`${this.baseUrl}/consolidacion/`, { params });
+    return this.http.get<ApiResponse<ConsolidationGroup[]>>(`${this.baseUrl}/consolidacion/`, {
+      params,
+    });
   }
-  //#endregion
 
-  //#region Distribution
-  getDistributionOrders(filters?: Partial<OrderFilters>): Observable<ApiResponse<DistributionOrder[]>> {
+  // Get distribution orders with optional filters
+  public getDistributionOrders(
+    filters?: Partial<OrderFilters>
+  ): Observable<ApiResponse<DistributionOrder[]>> {
     const params = this.buildQueryParams(filters);
-    return this.http.get<ApiResponse<DistributionOrder[]>>(
-      `${this.baseUrl}/distribucion/bloques/`,
-      { params }
-    );
+    return this.http.get<ApiResponse<DistributionOrder[]>>(`${this.baseUrl}/distribucion/`, {
+      params,
+    });
   }
-  //#endregion
 
-  //#region Helper Methods
+  // Helper Methods
   private buildQueryParams(filters: Partial<OrderFilters> = {}): HttpParams {
     let params = new HttpParams();
 
@@ -85,5 +90,4 @@ export class LogisTrackService {
 
     return params;
   }
-  //#endregion
 }

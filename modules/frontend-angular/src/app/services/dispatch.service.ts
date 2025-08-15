@@ -1,25 +1,17 @@
-import { Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
 import { LogisTrackService } from './logistrack.service';
-import { DispatchOrder, OrderFilters } from '../interfaces';
+import { Observable, map } from 'rxjs';
+import { DispatchOrder, OrderFilters, ApiResponse } from '../interfaces';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DispatchService {
-  constructor(private apiService: LogisTrackService) {}
+  private readonly _baseService: LogisTrackService = inject(LogisTrackService);
 
-  getOrders(filters: Partial<OrderFilters> = {}): Observable<DispatchOrder[]> {
-    // Ensure we have a valid filters object
-    const queryFilters: Partial<OrderFilters> = { ...filters };
-    return this.apiService.getDispatchOrders(filters).pipe(
-      map(response => response.data)
-    );
-  }
+  constructor() {}
 
-  getOrderById(id: string | number): Observable<DispatchOrder> {
-    return this.apiService.getDispatchOrderById(id).pipe(
-      map(response => response.data)
-    );
+  public getOrders(filters: Partial<OrderFilters> = {}): Observable<ApiResponse<DispatchOrder[]>> {
+    return this._baseService.getDispatchOrders(filters).pipe(map((response) => response || []));
   }
 }

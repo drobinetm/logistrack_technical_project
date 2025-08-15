@@ -1,0 +1,18 @@
+# IDE
+.vscode/
+.idea/
+
+# Build
+/dist/
+/node_modules/
+
+# Misc
+*.md
+*.json
+*.yml
+*.yaml
+*.html
+
+# System Files
+.DS_Store
+Thumbs.db

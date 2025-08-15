@@ -1,0 +1,207 @@
+<div class="consolidacion-container">
+  <div class="header">
+    <h1>Lista de órdenes consolidadas</h1>
+  </div>
+
+  <!-- Filters Section -->
+  <mat-card class="filters-card">
+    <form [formGroup]="filterForm" class="filters-form">
+      <div class="filter-row">
+        <mat-form-field appearance="outline" class="status-filter">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="status">
+            <mat-option value="">Todos</mat-option>
+            <mat-option value="pending">Pendientes</mat-option>
+            <mat-option value="ready">Listos</mat-option>
+            <mat-option value="assigned">Asignados</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="date-filter">
+          <mat-label>Fecha de Despacho</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="date">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <button type="button" mat-icon-button class="clear-date" *ngIf="filterForm.get('date')?.value"
+                  (click)="filterForm.patchValue({ date: null }); filterForm.updateValueAndValidity()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+    </form>
+
+    <div class="filter-actions">
+      <button mat-stroked-button class="clear-button" (click)="clearFilters()" [disabled]="!filterForm.dirty">
+        <mat-icon>clear</mat-icon>
+        Limpiar Filtros
+      </button>
+    </div>
+  </mat-card>
+
+  <!-- Summary Stats -->
+  <div class="summary-grid">
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon color="primary">view_module</mat-icon>
+          <div>
+            <div class="summary-number">{{ blockGroups.length }}</div>
+            <div class="summary-label">Bloques Activos</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon color="accent">inventory_2</mat-icon>
+          <div>
+            <div class="summary-number">{{ getTotalOrders() }}</div>
+            <div class="summary-label">Órdenes Consolidadas</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon style="color: #4caf50">check_circle</mat-icon>
+          <div>
+            <div class="summary-number">{{ getReadyBlocks() }}</div>
+            <div class="summary-label">Bloques Listos</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon color="warn">local_shipping</mat-icon>
+          <div>
+            <div class="summary-number">{{ getAssignedDrivers() }}</div>
+            <div class="summary-label">Choferes Asignados</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Main Content -->
+  <mat-card class="main-card">
+    <div class="tab-content">
+          <div class="kanban-toolbar">
+            <div class="kanban-legend">
+                  <span class="legend-item">
+                    <div class="legend-color pending"></div>
+                    Pendiente
+                  </span>
+              <span class="legend-item">
+                    <div class="legend-color ready"></div>
+                    Listo
+                  </span>
+              <span class="legend-item">
+                    <div class="legend-color assigned"></div>
+                    Asignado
+                  </span>
+            </div>
+          </div>
+
+          <div class="kanban-container" cdkDropListGroup>
+            <div *ngFor="let block of filteredBlocks"
+                 class="kanban-column"
+                 [class]="'block-' + block.status">
+
+              <!-- Block Header -->
+              <div class="kanban-header">
+                <div class="block-info">
+                  <h3>{{ block.name }}</h3>
+                  <mat-chip [class]="'status-' + block.status">
+                    {{ getStatusText(block.status) }}
+                  </mat-chip>
+                </div>
+              </div>
+
+              <!-- Block Stats -->
+              <div class="block-stats">
+                <div class="stat">
+                  <mat-icon>inventory</mat-icon>
+                  <span>{{ block.orders.length }} {{ block.orders.length === 1 ? 'orden' : 'órdenes' }}</span>
+                </div>
+                <div class="stat">
+                  <mat-icon>scale</mat-icon>
+                  <span>{{ block.weight }} kg</span>
+                </div>
+                <div class="stat" *ngIf="block.driver">
+                  <mat-icon>person</mat-icon>
+                  <span>{{ block.driver }}</span>
+                </div>
+              </div>
+
+              <!-- Capacity Bar -->
+              <div class="capacity-section">
+                <div class="capacity-label">
+                  <span>Capacidad</span>
+                  <span>{{ getCapacityPercentage(block) }}%</span>
+                </div>
+                <mat-progress-bar
+                  mode="determinate"
+                  [value]="getCapacityPercentage(block)"
+                  [color]="getCapacityColor(block)">
+                </mat-progress-bar>
+              </div>
+
+              <!-- Orders List -->
+              <div class="orders-list"
+                   cdkDropList
+                   [cdkDropListData]="block.orders"
+                   (cdkDropListDropped)="drop($event)">
+
+                <div *ngFor="let order of block.orders" class="order-card" cdkDrag>
+                  <div class="order-header">
+                    <span class="order-id">{{ order.code }}</span>
+                  </div>
+
+                  <div class="order-details">
+                    <div class="detail-row">
+                      <mat-icon>location_on</mat-icon>
+                      <span class="destination">{{ order.destination || 'No destination' }}</span>
+                    </div>
+
+                    <div class="detail-row products-container" *ngIf="order.products?.length">
+                      <mat-icon>inventory</mat-icon>
+                      <div class="products-list">
+                        <div class="products-label">Products:</div>
+                        <div class="product-items">
+                          <div *ngFor="let product of order.products" class="product-item">
+                            • {{ product.name || 'Product' }} - {{ product.sku || 'N/A' }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="detail-row" *ngIf="!order.products?.length">
+                      <mat-icon>inventory</mat-icon>
+                      <span>No products</span>
+                    </div>
+
+                    <div class="detail-row">
+                      <mat-icon>event</mat-icon>
+                      <span>{{ order.dispatchDate ? (order.dispatchDate | date:'mediumDate') : 'No date' }}</span>
+                    </div>
+
+                    <div class="detail-row">
+                      <mat-icon>scale</mat-icon>
+                      <span>{{ order.weight || 0 }} kg • {{ order.volume || 0 }} m³</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
+  </mat-card>
+
+</div>

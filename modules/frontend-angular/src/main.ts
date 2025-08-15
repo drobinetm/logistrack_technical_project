@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { importProvidersFrom } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -44,13 +44,14 @@ const routes: Routes = [
   { path: 'shipping', component: ShippingComponent },
   { path: 'receiving', component: ReceivingComponent },
   { path: 'consolidation', component: ConsolidationComponent },
-  { path: 'distribution', component: DistributionComponent }
+  { path: 'distribution', component: DistributionComponent },
 ];
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideAnimations(),
     provideRouter(routes),
+    provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(
       CommonModule,
       FormsModule,
@@ -74,6 +75,6 @@ bootstrapApplication(AppComponent, {
       MatBadgeModule,
       MatDialogModule,
       MatSnackBarModule
-    )
-  ]
+    ),
+  ],
 });

@@ -11,7 +11,7 @@ export interface Order {
   dispatchDate?: string;
   latitude?: number;
   longitude?: number;
-  _raw?: any;
+  _raw?: unknown;
 }
 
 export interface OrderFilters {

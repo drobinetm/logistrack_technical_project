@@ -1,0 +1,218 @@
+<div class="recepcion-container">
+  <div class="header">
+    <h1>Lista de órdenes recibidas</h1>
+    <div class="header-stats">
+      <mat-chip color="primary" class="stat-chip">
+        <mat-icon>inbox</mat-icon>
+        {{ getTotalReceived() }} Recibidas
+      </mat-chip>
+      <mat-chip color="warn" class="stat-chip" [matBadge]="getIncidents()" matBadgeColor="warn">
+        <mat-icon>warning</mat-icon>
+        Incidencias
+      </mat-chip>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-grid">
+    <mat-card class="summary-card received">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon>check_circle</mat-icon>
+          <div>
+            <div class="summary-number">{{ getReceivedToday() }}</div>
+            <div class="summary-label">Recibidas Hoy</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card pending">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon>schedule</mat-icon>
+          <div>
+            <div class="summary-number">{{ getPendingReception() }}</div>
+            <div class="summary-label">Pendientes</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card issues">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon>error</mat-icon>
+          <div>
+            <div class="summary-number">{{ getWithIssues() }}</div>
+            <div class="summary-label">Con Problemas</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters-form" (ngSubmit)="applyFilters()">
+        <mat-form-field appearance="outline">
+          <mat-label>Buscar</mat-label>
+          <input matInput placeholder="ID, origen..." formControlName="search">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="status">
+            <mat-option value="">Todos</mat-option>
+            <mat-option value="completed">Recibida</mat-option>
+            <mat-option value="in-progress">Procesando</mat-option>
+            <mat-option value="pending">Pendiente</mat-option>
+            <mat-option value="error">Con Incidencias</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha Despacho</mat-label>
+          <input matInput [matDatepicker]="despachoDatePicker" formControlName="dispatchDate">
+          <mat-datepicker-toggle matSuffix [for]="despachoDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #despachoDatePicker></mat-datepicker>
+        </mat-form-field>
+
+      </form>
+
+      <div class="filter-actions">
+        <button mat-stroked-button class="clear-button" (click)="clearFilters()" [disabled]="!hasActiveFilters()">
+          <mat-icon>clear</mat-icon>
+          Limpiar Filtros
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Orders List -->
+  <mat-card class="orders-card">
+    <mat-card-header>
+      <mat-card-title>Órdenes Recibidas</mat-card-title>
+      <mat-card-subtitle>{{ dataSource.data.length }} órdenes encontradas</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort>
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+            <td mat-cell *matCellDef="let element">
+              <span class="order-id">{{ element.code }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="origin">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Origen</th>
+            <td mat-cell *matCellDef="let element">{{ element.origin }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Despacho</th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.dispatchDate | date:"dd/MM/yyyy HH:mm" : 'UTC' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+            <td mat-cell *matCellDef="let element">
+              <mat-chip [class]="'status-' + element.status">
+                <mat-icon>{{ getStatusIcon(element.status) }}</mat-icon>
+                {{ getStatusText(element.status) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="driver">
+            <th mat-header-cell *matHeaderCellDef>Chofer</th>
+            <td mat-cell *matCellDef="let element">
+              <mat-icon>person</mat-icon>
+              {{ getDriverName(element) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="weight">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Peso</th>
+            <td mat-cell *matCellDef="let element">{{ element.weight || 0 }} kg</td>
+          </ng-container>
+
+          <ng-container matColumnDef="incidents">
+            <th mat-header-cell *matHeaderCellDef>Incidencias</th>
+            <td mat-cell *matCellDef="let element">
+              <mat-chip
+                *ngIf="element.incidents && element.incidents.length > 0"
+                color="warn"
+                [matBadge]="element.incidents.length">
+                <mat-icon>warning</mat-icon>
+                {{ element.incidents.length }}
+              </mat-chip>
+              <span *ngIf="!element.incidents || element.incidents.length === 0"
+                    class="no-incidents">Sin incidencias</span>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+      <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Incidents Panel -->
+  <mat-card class="incidents-card" *ngIf="ordersWithIncidents.length > 0">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>warning</mat-icon>
+        Incidencias Activas
+      </mat-card-title>
+      <mat-card-subtitle>{{ ordersWithIncidents.length }} órdenes con problemas</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-accordion>
+        <mat-expansion-panel *ngFor="let order of ordersWithIncidents" class="incident-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span class="incident-order">{{ order.id }}</span>
+              <mat-chip color="warn" class="incident-count">
+                {{ order.incidents?.length || 0 }} incidencias
+              </mat-chip>
+            </mat-panel-title>
+            <mat-panel-description>
+              {{ order.origin }} → {{ order.destination }}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="incident-details">
+            <div *ngFor="let incident of order.incidents" class="incident-item">
+              <mat-icon color="warn">error</mat-icon>
+              <span class="incident-text">{{ incident }}</span>
+              <button mat-icon-button color="primary">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </div>
+
+            <div class="incident-actions">
+              <button mat-button color="primary">
+                <mat-icon>add</mat-icon>
+                Agregar Incidencia
+              </button>
+              <button mat-button color="accent">
+                <mat-icon>check</mat-icon>
+                Resolver Todas
+              </button>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </mat-card-content>
+  </mat-card>
+
+</div>

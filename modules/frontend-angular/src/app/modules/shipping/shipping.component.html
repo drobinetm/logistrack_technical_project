@@ -1,0 +1,276 @@
+<div class="expedicion-container">
+  <div class="header">
+    <h1>Órdenes listas para salir</h1>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon color="primary">local_shipping</mat-icon>
+          <div>
+            <div class="summary-number">{{ getTotalShipments() }}</div>
+            <div class="summary-label">Total de Órdenes</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon color="accent">person</mat-icon>
+          <div>
+            <div class="summary-number">{{ getActiveDrivers() }}</div>
+            <div class="summary-label">Choferes Activos</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon color="warn">schedule</mat-icon>
+          <div>
+            <div class="summary-number">{{ getPendingShipments() }}</div>
+            <div class="summary-label">Pendientes</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon style="color: #4caf50">shopping_bag</mat-icon>
+          <div>
+            <div class="summary-number">{{ getTotalBags() }}</div>
+            <div class="summary-label">Total Bolsas</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Tabs for different views -->
+  <mat-card class="main-card">
+    <mat-tab-group>
+      <!-- All Shipments Tab -->
+      <mat-tab label="Todos los Envíos">
+        <div class="tab-content">
+          <div class="filters-section">
+            <div class="filter-row">
+              <mat-form-field appearance="outline" class="search-filter">
+                <mat-label>Buscar</mat-label>
+                <input matInput (keyup)="applyFilter($event, 'all')" placeholder="Chofer, destino...">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="status-filter">
+                <mat-label>Estado</mat-label>
+                <mat-select [formControl]="statusFilter" (selectionChange)="filterByStatus($event.value)">
+                  <mat-option value="">Todos</mat-option>
+                  <mat-option value="pending">Pendiente</mat-option>
+                  <mat-option value="in-progress">En Ruta</mat-option>
+                  <mat-option value="completed">Completado</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="date-filter">
+                <mat-label>Fecha de Despacho</mat-label>
+                <input matInput [matDatepicker]="picker" [formControl]="dateFilter">
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
+            </div>
+
+            <div class="filter-actions">
+              <button mat-stroked-button class="clear-button" (click)="clearAllFilters()" [disabled]="!hasActiveFilters()">
+                <mat-icon>clear</mat-icon>
+                Limpiar Filtros
+              </button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table mat-table [dataSource]="allShipmentsDataSource" matSort>
+              <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+                <td mat-cell *matCellDef="let element">{{ element.code }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="driver">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Chofer</th>
+                <td mat-cell *matCellDef="let element">
+                  <div class="driver-info">
+                    <mat-icon>person</mat-icon>
+                    <span *ngIf="element.driver?.firstName || element.driver?.lastName">
+                      {{ element.driver.firstName }} {{ element.driver.lastName }}
+                      <span *ngIf="element.driver.licensePlate" class="license-plate">
+                        ({{ element.driver.licensePlate }})
+                      </span>
+                    </span>
+                    <span *ngIf="!element.driver?.firstName && !element.driver?.lastName">
+                      No asignado
+                    </span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="destination">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Destino</th>
+                <td mat-cell *matCellDef="let element">{{ element.destination }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+                <td mat-cell *matCellDef="let element">{{ element.date | date:'dd/MM/yyyy HH:mm' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="bags">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Bolsas</th>
+                <td mat-cell *matCellDef="let element">
+                  <mat-chip color="primary">{{ element.bags || 0 }}</mat-chip>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+                <td mat-cell *matCellDef="let element">
+                  <mat-chip [class]="'status-' + element.status">
+                    <mat-icon>{{ getStatusIcon(element.status) }}</mat-icon>
+                    {{ getStatusText(element.status) }}
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                <td mat-cell *matCellDef="let element">
+                  <button mat-icon-button color="primary" (click)="trackRoute(element)" matTooltip="Ver ruta">
+                    <mat-icon>location_on</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+
+          <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
+        </div>
+      </mat-tab>
+      <!-- By Carrier Tab -->
+      <mat-tab label="Por Transportista">
+        <div class="tab-content">
+          <div class="carriers-grid">
+            <mat-card *ngFor="let group of getCarrierGroups()" class="carrier-card">
+              <mat-card-header>
+                <div mat-card-avatar class="carrier-avatar">
+                  <mat-icon>local_shipping</mat-icon>
+                </div>
+                <mat-card-title>
+                  <span class="driver-name">{{ group.driverName }}</span>
+                  <span class="license-plate" *ngIf="group.licensePlate">{{ group.licensePlate }}</span>
+                </mat-card-title>
+                <mat-card-subtitle>{{ group.volume }} • {{ group.weight }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="carrier-stats">
+                  <div class="stat">
+                    <span class="stat-value">{{ group.totalOrders }}</span>
+                    <span class="stat-label">Órdenes</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-value">{{ group.totalBags }}</span>
+                    <span class="stat-label">Bolsas</span>
+                  </div>
+                </div>
+                <div class="carrier-orders">
+                  <div *ngFor="let order of group.orders | slice:0:3" class="carrier-order">
+                    <span class="order-id">#{{ order.id }}</span>
+                    <span class="order-destination">{{ order.destination }}</span>
+                    <span class="order-status" [class]="'status-' + order.status">
+                      {{ getStatusText(order.status) }}
+                    </span>
+                  </div>
+                  <div *ngIf="group.orders.length > 3" class="more-orders">
+                    +{{ group.orders.length - 3 }} más
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+</div>
+
+<!-- Route Details Card (moved outside the main card) -->
+<mat-card class="route-card" *ngIf="selectedOrder">
+  <mat-card-header>
+    <mat-card-title>Detalles de la orden #{{selectedOrder.id}}</mat-card-title>
+    <button mat-icon-button class="close-button" (click)="closeRouteCard()" matTooltip="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-card-header>
+  <mat-card-content class="route-content">
+    <div class="map-container">
+      <app-map
+        #mapComponent
+        [markers]="routeMarkers"
+        [fullHeight]="false"
+        height="400px">
+      </app-map>
+    </div>
+
+    <div class="route-details">
+      <div class="detail-row">
+        <mat-icon>local_shipping</mat-icon>
+        <div class="detail-text">
+          <div class="detail-label">Chofer</div>
+          <div class="detail-value">
+            {{selectedOrder.driver?.firstName || ''}} {{selectedOrder.driver?.lastName || ''}}
+            <span *ngIf="selectedOrder.driver?.licensePlate" class="license-plate">
+              {{selectedOrder.driver?.licensePlate || ''}}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-row">
+        <mat-icon>location_on</mat-icon>
+        <div class="detail-text">
+          <div class="detail-label">Destino</div>
+          <div class="detail-value">{{selectedOrder.destination}}</div>
+        </div>
+      </div>
+
+      <div class="detail-row">
+        <mat-icon>access_time</mat-icon>
+        <div class="detail-text">
+          <div class="detail-label">Hora Estimada</div>
+          <div class="detail-value">{{selectedOrder.estimatedTime || 'No especificada'}}</div>
+        </div>
+      </div>
+
+      <div class="detail-row">
+        <mat-icon>shopping_bag</mat-icon>
+        <div class="detail-text">
+          <div class="detail-label">Bolsas</div>
+          <div class="detail-value">{{selectedOrder.bags || 0}}</div>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+  <mat-card-actions align="end" class="card-actions">
+    <button mat-button color="warn" (click)="closeRouteCard()">
+      <mat-icon>close</mat-icon>
+      Cerrar
+    </button>
+  </mat-card-actions>
+</mat-card>

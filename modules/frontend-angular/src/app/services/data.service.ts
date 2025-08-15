@@ -28,17 +28,23 @@ export interface KPI {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DataService {
   private ordersSubject = new BehaviorSubject<Order[]>(this.generateMockOrders());
-  
-  orders$ = this.ordersSubject.asObservable();
+
+  public orders$ = this.ordersSubject.asObservable();
 
   private generateMockOrders(): Order[] {
     const origins = ['CD Santiago', 'CD Valparaíso', 'CD Concepción', 'CD Antofagasta'];
     const destinations = ['Pyme A', 'Pyme B', 'Pyme C', 'Pyme D', 'Pyme E'];
-    const drivers = ['Juan Pérez', 'Ana García', 'Carlos López', 'María Rodríguez', 'Pedro Martínez'];
+    const drivers = [
+      'Juan Pérez',
+      'Ana García',
+      'Carlos López',
+      'María Rodríguez',
+      'Pedro Martínez',
+    ];
     const statuses: Order['status'][] = ['pending', 'in-progress', 'completed', 'error'];
     const blocks = ['A', 'B', 'C', 'D'];
 
@@ -58,53 +64,53 @@ export class DataService {
       incidents: Math.random() > 0.8 ? ['Retraso en entrega', 'Producto dañado'] : [],
       block: blocks[Math.floor(Math.random() * blocks.length)],
       signature: Math.random() > 0.3,
-      photo: Math.random() > 0.4
+      photo: Math.random() > 0.4,
     }));
   }
 
-  getOrders(): Observable<Order[]> {
+  public getOrders(): Observable<Order[]> {
     return this.orders$;
   }
 
-  getKPIs(): KPI[] {
+  public getKPIs(): KPI[] {
     const orders = this.ordersSubject.value;
     return [
       {
         label: 'Órdenes en Despacho',
-        value: orders.filter(o => o.status === 'in-progress').length,
+        value: orders.filter((o) => o.status === 'in-progress').length,
         icon: 'send',
-        color: '#1976d2'
+        color: '#1976d2',
       },
       {
         label: 'Bloques Listos',
         value: 8,
         icon: 'inventory',
-        color: '#388e3c'
+        color: '#388e3c',
       },
       {
         label: 'Entregas Completadas',
-        value: orders.filter(o => o.status === 'completed').length,
+        value: orders.filter((o) => o.status === 'completed').length,
         icon: 'check_circle',
-        color: '#388e3c'
+        color: '#388e3c',
       },
       {
         label: 'Entregas Pendientes',
-        value: orders.filter(o => o.status === 'pending').length,
+        value: orders.filter((o) => o.status === 'pending').length,
         icon: 'pending',
-        color: '#ff9800'
-      }
+        color: '#ff9800',
+      },
     ];
   }
 
-  getOrdersByStatus(status: string): Order[] {
-    return this.ordersSubject.value.filter(order => order.status === status);
+  public getOrdersByStatus(status: string): Order[] {
+    return this.ordersSubject.value.filter((order) => order.status === status);
   }
 
-  getOrdersByBlock(): { [key: string]: Order[] } {
+  public getOrdersByBlock(): { [key: string]: Order[] } {
     const orders = this.ordersSubject.value;
     const grouped: { [key: string]: Order[] } = {};
-    
-    orders.forEach(order => {
+
+    orders.forEach((order) => {
       if (order.block) {
         if (!grouped[order.block]) {
           grouped[order.block] = [];
@@ -112,7 +118,7 @@ export class DataService {
         grouped[order.block].push(order);
       }
     });
-    
+
     return grouped;
   }
 }

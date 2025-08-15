@@ -1,0 +1,131 @@
+<div class="dispatch-container">
+  <div class="header">
+    <h1>Administración de Despachos</h1>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-header>
+      <mat-card-title>Filtros</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Buscar</mat-label>
+          <input matInput formControlName="search" placeholder="ID, Origen o Destino">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo</mat-label>
+          <mat-select formControlName="cdPyme">
+            <mat-option value="">Todos</mat-option>
+            <mat-option value="CD">Centro de Distribución</mat-option>
+            <mat-option value="Pyme">Pyme</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha de Despacho</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="date">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </form>
+
+      <div class="filter-actions">
+        <button mat-stroked-button class="clear-button" (click)="clearFilters()" [disabled]="!filterForm.dirty">
+          <mat-icon>clear</mat-icon>
+          Limpiar Filtros
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Data Table -->
+  <mat-card class="table-card">
+    <mat-card-header>
+      <mat-card-title>Órdenes de Despacho</mat-card-title>
+      <mat-card-subtitle>{{ dataSource.data.length }} órdenes encontradas</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort>
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+            <td mat-cell *matCellDef="let element">
+              <span class="order-id">{{ element.code }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="origin">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Origen</th>
+            <td mat-cell *matCellDef="let element">{{ element.origin }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="destination">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Destino</th>
+            <td mat-cell *matCellDef="let element">{{ element.destination }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="dispatchDate">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+            <td mat-cell *matCellDef="let element">{{ element.dispatchDate | date:'dd/MM/yyyy' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="cdPyme">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+            <td mat-cell *matCellDef="let element">
+              <mat-chip [class]="'type-' + element.cdPyme.toLowerCase()">
+                {{ element.cdPyme === 'CD' ? 'Centro de Distribución' : 'Pyme' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+            <td mat-cell *matCellDef="let element">
+              <mat-chip [class]="'status-' + element.status">
+                <mat-icon>{{ getStatusIcon(element.status) }}</mat-icon>
+                {{ getStatusText(element.status) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let element">
+              <button mat-icon-button color="primary" (click)="showOnMap(element)" matTooltip="Ver en mapa">
+                <mat-icon>location_on</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Seleccionar página"></mat-paginator>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Map View -->
+  <mat-card class="map-card" *ngIf="showMap">
+    <mat-card-header>
+      <mat-card-title>Ruta de Despacho</mat-card-title>
+      <button mat-icon-button (click)="hideMap()" matTooltip="Cerrar mapa" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <app-map [markers]="routeMarkers" height="500px"></app-map>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<!-- Loading Spinner -->
+<div class="loading-shade" *ngIf="isLoading">
+  <mat-spinner diameter="50"></mat-spinner>
+</div>

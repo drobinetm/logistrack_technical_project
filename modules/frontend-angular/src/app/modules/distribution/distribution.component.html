@@ -1,0 +1,200 @@
+<div class="distribucion-container">
+  <div class="header">
+    <h1>Lista de órdenes distribuidas</h1>
+    <div class="header-stats">
+      <mat-chip color="primary" class="stat-chip">
+        <mat-icon>local_shipping</mat-icon>
+        {{ getTotalDeliveries() }} Total
+      </mat-chip>
+      <mat-chip color="accent" class="stat-chip">
+        <mat-icon>check_circle</mat-icon>
+        {{ getDeliveredCount() }} Entregadas
+      </mat-chip>
+      <mat-chip color="warn" class="stat-chip" [matBadge]="getRejectedCount()" matBadgeColor="warn">
+        <mat-icon>cancel</mat-icon>
+        Rechazadas
+      </mat-chip>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-grid">
+    <mat-card class="summary-card delivered">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon>check_circle</mat-icon>
+          <div>
+            <div class="summary-number">{{ getDeliveredCount() }}</div>
+            <div class="summary-label">Entregadas</div>
+            <div class="summary-percentage">{{ getDeliveredPercentage() }}%</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card pending">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon>schedule</mat-icon>
+          <div>
+            <div class="summary-number">{{ getPendingCount() }}</div>
+            <div class="summary-label">Pendientes</div>
+            <div class="summary-percentage">{{ getPendingPercentage() }}%</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card rejected">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon>cancel</mat-icon>
+          <div>
+            <div class="summary-number">{{ getRejectedCount() }}</div>
+            <div class="summary-label">Rechazadas</div>
+            <div class="summary-percentage">{{ getRejectedPercentage() }}%</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card in-transit">
+      <mat-card-content>
+        <div class="summary-content">
+          <mat-icon>local_shipping</mat-icon>
+          <div>
+            <div class="summary-number">{{ getInTransitCount() }}</div>
+            <div class="summary-label">En Tránsito</div>
+            <div class="summary-percentage">{{ getInTransitPercentage() }}%</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Filters Card -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters-form">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Buscar</mat-label>
+          <input matInput placeholder="ID, destino, chofer..." formControlName="search">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="status">
+            <mat-option value="">Todos</mat-option>
+            <mat-option value="completed">Entregada</mat-option>
+            <mat-option value="pending">Pendiente</mat-option>
+            <mat-option value="in-progress">En Tránsito</mat-option>
+            <mat-option value="error">Rechazada</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Chofer</mat-label>
+          <mat-select formControlName="driver">
+            <mat-option value="">Todos</mat-option>
+            <mat-option *ngFor="let driver of getDrivers()" [value]="driver">
+              {{ driver }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Fecha de Despacho</mat-label>
+          <input matInput [matDatepicker]="picker1" formControlName="dateFrom">
+          <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+          <mat-datepicker #picker1></mat-datepicker>
+        </mat-form-field>
+
+        <div class="filter-actions">
+          <button mat-stroked-button type="button" (click)="clearFilters()" class="clear-button" [disabled]="!hasActiveFilters()">
+            <mat-icon>clear</mat-icon>
+            Limpiar Filtros
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Deliveries Table Card -->
+  <mat-card class="main-card">
+    <mat-card-header>
+      <mat-card-title>Lista de Entregas</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort>
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+            <td mat-cell *matCellDef="let element">
+              <span class="order-id">{{ element.code }}</span>
+            </td>
+          </ng-container>
+
+              <ng-container matColumnDef="destination">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Destino</th>
+            <td mat-cell *matCellDef="let element">{{ element.destination }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="driver">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Chofer</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="driver-info">
+                <mat-icon>person</mat-icon>
+                {{ element.driver?.firstName }} {{ element.driver?.lastName || '' }}
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="deliveryDate">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Despacho</th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.dispatchDate | date:'dd/MM/yyyy HH:mm' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+            <td mat-cell *matCellDef="let element">
+              <mat-chip [class]="'status-' + element.status">
+                <mat-icon>{{ getStatusIcon(element.status) }}</mat-icon>
+                {{ getStatusText(element.status) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="confirmation">
+            <th mat-header-cell *matHeaderCellDef>Confirmación</th>
+            <td mat-cell *matCellDef="let element">
+              <mat-icon [class]="'blue-icon'">{{ element.confirmation ? 'check_circle' : 'info' }}</mat-icon>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="attempts">
+            <th mat-header-cell *matHeaderCellDef>Intentos</th>
+            <td mat-cell *matCellDef="let element">
+              <mat-chip
+                [color]="getAttemptsColor(element.attemptCount || 1)"
+                class="attempts-chip">
+                {{ element.attemptCount || 1 }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row
+              *matRowDef="let row; columns: displayedColumns;"
+              [class.delivered-row]="row.status === 'completed'"
+              [class.rejected-row]="row.status === 'error'">
+          </tr>
+        </table>
+      </div>
+      <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+
+</div>

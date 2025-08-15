@@ -1,8 +1,8 @@
-import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
-import { MatSortModule, MatSort, Sort } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,6 +23,8 @@ import { DispatchService } from '../../services/dispatch.service';
 @Component({
   selector: 'app-dispatch',
   standalone: true,
+  templateUrl: './dispatch.component.html',
+  providers: [{ provide: 'BASE_API_URL', useValue: 'http://localhost:8000/api' }],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -39,317 +41,101 @@ import { DispatchService } from '../../services/dispatch.service';
     MatFormFieldModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
-    MapComponent
+    MapComponent,
   ],
-  template: `
-    <div class="dispatch-container">
-      <div class="header">
-        <h1>Dispatch Management</h1>
-      </div>
-
-      <!-- Filters -->
-      <mat-card class="filters-card">
-        <mat-card-header>
-          <mat-card-title>Filtros</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <form [formGroup]="filterForm" class="filters-form">
-            <mat-form-field appearance="outline">
-              <mat-label>Buscar</mat-label>
-              <input matInput placeholder="ID, origen, destino..." formControlName="search">
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Tipo</mat-label>
-              <mat-select formControlName="cdPyme">
-                <mat-option value="">Todos</mat-option>
-                <mat-option value="CD">CD</mat-option>
-                <mat-option value="Pyme">Pyme</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Fecha de Despacho</mat-label>
-              <input matInput [matDatepicker]="picker1" formControlName="dispatchDate">
-              <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
-              <mat-datepicker #picker1></mat-datepicker>
-            </mat-form-field>
-          </form>
-
-          <div class="filter-actions">
-            <button mat-button (click)="clearFilters()">
-              <mat-icon>clear</mat-icon>
-              Limpiar Filtros
-            </button>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Data Table -->
-      <mat-card class="table-card">
-        <mat-card-header>
-          <mat-card-title>Órdenes de Despacho</mat-card-title>
-          <mat-card-subtitle>{{ dataSource.data.length }} órdenes encontradas</mat-card-subtitle>
-
-        </mat-card-header>
-        <mat-card-content>
-          <div class="table-container">
-            <table mat-table [dataSource]="dataSource" matSort>
-              <ng-container matColumnDef="id">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
-                <td mat-cell *matCellDef="let element">
-                  <span class="order-id">{{ element.id }}</span>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="origin">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Origen</th>
-                <td mat-cell *matCellDef="let element">{{ element.origin }}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="destination">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Destino</th>
-                <td mat-cell *matCellDef="let element">{{ element.destination }}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="date">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
-                <td mat-cell *matCellDef="let element">{{ element.date | date:'dd/MM/yyyy' }}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="cdPyme">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
-                <td mat-cell *matCellDef="let element">
-                  <mat-chip [class]="'type-' + element.cdPyme.toLowerCase()">
-                    {{ element.cdPyme === 'CD' ? 'Centro de Distribución' : 'Pyme' }}
-                  </mat-chip>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
-                <td mat-cell *matCellDef="let element">
-                  <mat-chip [class]="'status-' + element.status">
-                    <mat-icon>{{ getStatusIcon(element.status) }}</mat-icon>
-                    {{ getStatusText(element.status) }}
-                  </mat-chip>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>Acciones</th>
-                <td mat-cell *matCellDef="let element">
-                  <button mat-icon-button color="accent" (click)="showOnMap(element)" matTooltip="Ver en mapa">
-                    <mat-icon>map</mat-icon>
-                  </button>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
-          </div>
-
-          <mat-paginator
-            [pageSizeOptions]="[10, 25, 50]"
-            showFirstLastButtons
-            aria-label="Seleccionar página">
-          </mat-paginator>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Map Section -->
-      <mat-card class="map-card" *ngIf="showMap && selectedOrder">
-        <mat-card-header>
-          <mat-card-title>Ubicación - {{ selectedOrder.id }}</mat-card-title>
-          <mat-card-subtitle>{{ selectedOrder.origin }} → {{ selectedOrder.destination }}</mat-card-subtitle>
-          <button mat-icon-button (click)="hideMap()">
-            <mat-icon>close</mat-icon>
-          </button>
-        </mat-card-header>
-        <mat-card-content>
-          <app-map
-            [markers]="routeMarkers"
-            [fullHeight]="true">
-          </app-map>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  `,
-  styles: [`
-    .dispatch-container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-
-    .header h1 {
-      margin: 0;
-      font-weight: 300;
-      color: #333;
-    }
-
-    .filters-card {
-      margin-bottom: 24px;
-    }
-
-    .filters-form {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      align-items: start;
-    }
-
-    .filter-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .table-card {
-      margin-bottom: 24px;
-    }
-
-    .card-actions {
-      margin-left: auto;
-      display: flex;
-      gap: 8px;
-    }
-
-    .table-container {
-      overflow-x: auto;
-      max-width: 100%;
-    }
-
-    .mat-mdc-table {
-      width: 100%;
-      min-width: 800px;
-    }
-
-    .order-id {
-      font-weight: 500;
-      color: #1976d2;
-    }
-
-    .type-cd {
-      background-color: #e3f2fd;
-      color: #1565c0;
-    }
-
-    .type-pyme {
-      background-color: #f3e5f5;
-      color: #7b1fa2;
-    }
-
-    .status-pending {
-      background-color: #fff3e0;
-      color: #ef6c00;
-    }
-
-    .status-in-progress {
-      background-color: #e8f5e8;
-      color: #2e7d32;
-    }
-
-    .status-completed {
-      background-color: #e8f5e8;
-      color: #2e7d32;
-    }
-
-    .status-error {
-      background-color: #ffebee;
-      color: #c62828;
-    }
-
-    .mat-mdc-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .mat-mdc-chip mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-    }
-
-    .actions-container {
-      display: flex;
-      gap: 4px;
-    }
-
-    .map-card {
-      margin-bottom: 24px;
-    }
-
-    .map-card mat-card-header {
-      display: flex;
-      align-items: center;
-    }
-
-    .map-card mat-card-header button {
-      margin-left: auto;
-    }
-
-    @media (max-width: 768px) {
-      .filters-form {
-        grid-template-columns: 1fr;
-      }
-
-      .card-actions {
-        display: none;
-      }
-
-      .mat-mdc-table {
-        min-width: 600px;
-      }
-    }
-  `]
+  styleUrls: ['./dispatch.component.scss'],
 })
 export class DispatchComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MapComponent) mapComponent!: MapComponent;
 
-  displayedColumns: string[] = ['id', 'origin', 'destination', 'date', 'cdPyme', 'status', 'actions'];
+  displayedColumns: string[] = [
+    'id',
+    'origin',
+    'destination',
+    'dispatchDate',
+    'cdPyme',
+    'status',
+    'actions',
+  ];
   dataSource = new MatTableDataSource<DispatchOrder>([]);
   filterForm: FormGroup;
   showMap = false;
   selectedOrder: DispatchOrder | null = null;
   routeMarkers: MapMarker[] = [];
-
-  // Base URL for backend API
-  private destroy$ = new Subject<void>();
   isLoading = false;
   currentFilters: Partial<OrderFilters> = {};
 
-  constructor(
-    private fb: FormBuilder,
-    private dispatchService: DispatchService,
-    private snackBar: MatSnackBar
-  ) {
+  // Services
+  private readonly dispatchService = inject(DispatchService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly fb = inject(FormBuilder);
+  private readonly destroy$ = new Subject<void>();
+
+  constructor() {
+    // Initialize form in constructor to avoid issues with injection timing
     this.filterForm = this.fb.group({
       search: [''],
       cdPyme: [''],
-      status: [''],
-      dispatchDate: ['']
+      date: [''],
     });
-    this.filterForm.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.applyFilters();
-      });
+
+    // Subscribe to form changes
+    this.filterForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.applyFilters();
+    });
   }
 
   ngAfterViewInit(): void {
+    // Set up the paginator and sort after the view is initialized
+    this.setupTable();
+  }
+
+  ngOnInit(): void {
+    // Set up filter predicate
+    this.dataSource.filterPredicate = (data: DispatchOrder, filter: string): boolean => {
+      const searchStr = JSON.stringify(data).toLowerCase();
+      return searchStr.indexOf(filter) !== -1;
+    };
+
+    // Initial data load
+    this.loadData();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private setupTable(): void {
+    // Connect paginator and sort to the data source
     this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+
+    // Set up sorting
+    if (this.sort) {
+      this.dataSource.sort = this.sort;
+      this.dataSource.sortingDataAccessor = (
+        item: DispatchOrder,
+        property: string
+      ): string | number => {
+        // Handle dispatchDate field specifically
+        if (property === 'dispatchDate') {
+          const date = item.dispatchDate;
+          if (!date) return '';
+          // Convert to Date if it's a string
+          const dateObj = typeof date === 'string' ? new Date(date) : date;
+          return isNaN(dateObj.getTime()) ? '' : dateObj.toISOString();
+        }
+
+        // Handle other fields
+        const value = item[property as keyof DispatchOrder];
+        if (value === undefined || value === null) return '';
+        if (value instanceof Date) return value.toISOString();
+        if (typeof value === 'number') return value;
+        return String(value);
+      };
+    }
   }
 
   private normalizeOrder(order: any): DispatchOrder {
@@ -364,13 +150,13 @@ export class DispatchComponent implements OnInit, AfterViewInit, OnDestroy {
       code: order.code || order.id?.toString() || '',
       origin: order.origin || 'Origen no especificado',
       destination: order.destination || 'Destino no especificado',
-      cdPyme: order.cdPyme || order.cd_pyme || 'CD',
+      cdPyme: (order.cdPyme || order.cd_pyme || 'CD') as 'CD' | 'Pyme',
       status: this.mapStatusToKey(order.status || ''),
       dispatchDate: order.dispatchDate ? new Date(order.dispatchDate) : new Date(),
       latitude: order.latitude || order.lat || 0,
       longitude: order.longitude || order.lng || 0,
       createdAt: order.createdAt ? new Date(order.createdAt) : new Date(),
-      updatedAt: order.updatedAt ? new Date(order.updatedAt) : new Date()
+      updatedAt: order.updatedAt ? new Date(order.updatedAt) : new Date(),
     };
   }
 
@@ -379,75 +165,94 @@ export class DispatchComponent implements OnInit, AfterViewInit, OnDestroy {
     const s = String(status).toLowerCase().trim();
     // Spanish and English variants
     if (['pendiente', 'pending'].includes(s)) return 'pending';
-    if (['en despacho', 'en_despacho', 'despacho', 'en proceso', 'en_proceso', 'proceso', 'in progress', 'in-progress'].includes(s)) return 'in-progress';
-    if (['completado', 'completada', 'completed', 'finalizado', 'finalizada'].includes(s)) return 'completed';
-    if (['error', 'rechazado', 'rechazada', 'failed', 'fallido', 'fallida'].includes(s)) return 'error';
+    if (
+      [
+        'en despacho',
+        'en_despacho',
+        'despacho',
+        'en proceso',
+        'en_proceso',
+        'proceso',
+        'in progress',
+        'in-progress',
+      ].includes(s)
+    )
+      return 'in-progress';
+    if (['completado', 'completada', 'completed', 'finalizado', 'finalizada'].includes(s))
+      return 'completed';
+    if (['error', 'rechazado', 'rechazada', 'failed', 'fallido', 'fallida'].includes(s))
+      return 'error';
     return 'pending';
   }
 
   private loadData(): void {
     this.isLoading = true;
 
-    const filters: Partial<OrderFilters> = {
-      ...this.currentFilters
-    };
+    // Create filters for the API request
+    const apiFilters: any = { ...this.currentFilters };
 
-    if (this.currentFilters?.dispatchDate) {
-      filters.startDate = new Date(this.currentFilters.dispatchDate);
+    // Remove status filter if it exists
+    if ('status' in apiFilters) {
+      delete apiFilters.status;
     }
 
-    this.dispatchService.getOrders(filters).subscribe({
+    // Format the date for the API if it exists
+    if (apiFilters.date) {
+      try {
+        // Ensure we have a proper Date object
+        const date = apiFilters.date instanceof Date ? apiFilters.date : new Date(apiFilters.date);
+
+        if (!isNaN(date.getTime())) {
+          // Format as YYYY-MM-DD for the API
+          apiFilters.date = date.toISOString().split('T')[0];
+        } else {
+          // If date is invalid, remove it from filters
+          delete apiFilters.date;
+        }
+      } catch (e) {
+        delete apiFilters.date;
+      }
+    }
+
+    this.dispatchService.getOrders(apiFilters).subscribe({
       next: (orders) => {
         try {
           // Normalize and validate orders from the API
-          this.dataSource.data = Array.isArray(orders)
-            ? orders.map(order => this.normalizeOrder(order))
+          const normalizedOrders = Array.isArray(orders)
+            ? orders.map((order) => this.normalizeOrder(order))
             : [];
 
-          if (this.paginator) this.dataSource.paginator = this.paginator;
-          if (this.sort) this.dataSource.sort = this.sort;
+          // Create a new MatTableDataSource to ensure change detection works
+          this.dataSource = new MatTableDataSource<DispatchOrder>(normalizedOrders);
+
+          // Set up the table with the new data source
+          this.setupTable();
+
+          // Trigger change detection
+          if (this.dataSource.paginator) {
+            this.dataSource.paginator.firstPage();
+          }
         } catch (error) {
-          console.error('Error normalizing orders:', error);
           this.snackBar.open('Error al procesar los datos de las órdenes', 'Cerrar', {
             duration: 5000,
-            panelClass: ['error-snackbar']
+            panelClass: ['error-snackbar'],
           });
           this.dataSource.data = [];
         } finally {
           this.isLoading = false;
         }
       },
-      error: (error) => {
-        console.error('Error loading dispatch orders:', error);
+      error: () => {
         this.snackBar.open('Error al cargar las órdenes', 'Cerrar', {
           duration: 5000,
-          panelClass: ['error-snackbar']
+          panelClass: ['error-snackbar'],
         });
         this.isLoading = false;
         this.dataSource.data = [];
-      }
+      },
     });
   }
 
-  ngOnInit(): void {
-    this.loadData();
-    // Initial empty filter
-    this.dataSource.filterPredicate = () => true;
-  }
-
-  applyFilters(): void {
-    this.currentFilters = { ...this.filterForm.value };
-
-    // If we have a date filter, reload data from server
-    if (this.currentFilters.dispatchDate) {
-      this.loadData();
-    } else {
-      // Trigger client-side filtering
-      this.filterData();
-    }
-  }
-
-  // Custom filtering function
   private filterData(): void {
     const searchTerm = (this.currentFilters.search || '').toLowerCase().trim();
     const cdPymeFilter = this.currentFilters.cdPyme || '';
@@ -457,7 +262,7 @@ export class DispatchComponent implements OnInit, AfterViewInit, OnDestroy {
 
       // Apply search filter
       if (searchTerm) {
-        matches = ['id', 'origin', 'destination'].some(prop =>
+        matches = ['id', 'origin', 'destination'].some((prop) =>
           data[prop as keyof DispatchOrder]?.toString().toLowerCase().includes(searchTerm)
         );
       }
@@ -474,8 +279,30 @@ export class DispatchComponent implements OnInit, AfterViewInit, OnDestroy {
     this.dataSource.filter = JSON.stringify({
       search: searchTerm,
       cdPyme: cdPymeFilter,
-      timestamp: new Date().getTime() // Ensure filter triggers on every call
+      timestamp: new Date().getTime(), // Ensure filter triggers on every call
     });
+  }
+
+  applyFilters(): void {
+    const formValue = this.filterForm.value;
+
+    // Update current filters with form values
+    this.currentFilters = { ...formValue };
+
+    // If we have a date filter, reload data from server
+    if (formValue.date) {
+      // Format the date for the API
+      this.currentFilters.date = new Date(formValue.date);
+      this.loadData();
+    } else {
+      // If date was cleared, ensure it's removed from filters
+      if ('date' in this.currentFilters) {
+        delete this.currentFilters.date;
+      }
+
+      // Trigger client-side filtering
+      this.filterData();
+    }
   }
 
   clearFilters(): void {
@@ -485,34 +312,35 @@ export class DispatchComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadData();
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  viewOrder(order: DispatchOrder): void {
-    console.log('Viewing order:', order);
-    // TODO: Open order detail dialog
-  }
-
   showOnMap(order: DispatchOrder): void {
-    this.selectedOrder = order;
-    this.routeMarkers = [
+    this.selectedOrder = { ...order };
+
+    // Create new markers array to trigger change detection
+    const newMarkers: MapMarker[] = [
       {
         lat: -33.4489 + Math.random() * 0.01,
         lng: -70.6693 + Math.random() * 0.01,
-        title: order.origin,
+        title: this.selectedOrder.origin,
         color: 'blue',
-        popup: `<b>Origen</b><br>${order.origin}`
+        popup: `<b>Origen</b><br>${this.selectedOrder.origin}`,
       },
       {
-        lat: order.latitude || -33.4489 + Math.random() * 0.01,
-        lng: order.longitude || -70.6693 + Math.random() * 0.01,
-        title: order.destination,
+        lat: this.selectedOrder.latitude || -33.4489 + Math.random() * 0.01,
+        lng: this.selectedOrder.longitude || -70.6693 + Math.random() * 0.01,
+        title: this.selectedOrder.destination,
         color: 'red',
-        popup: `<b>Destino</b><br>${order.destination}`
-      }
+        popup: `<b>Destino</b><br>${this.selectedOrder.destination}`,
+      },
     ];
+
+    // Update markers directly through the MapComponent if it exists
+    if (this.mapComponent) {
+      this.mapComponent.updateMarkers(newMarkers);
+    } else {
+      // Fallback to updating the markers array
+      this.routeMarkers = [...newMarkers];
+    }
+
     this.showMap = true;
   }
 
@@ -523,21 +351,31 @@ export class DispatchComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getStatusIcon(status: string = ''): string {
     switch (status) {
-      case 'completed': return 'check_circle';
-      case 'error': return 'error';
-      case 'pending': return 'schedule';
-      case 'in-progress': return 'sync';
-      default: return 'info';
+      case 'completed':
+        return 'check_circle';
+      case 'error':
+        return 'error';
+      case 'pending':
+        return 'schedule';
+      case 'in-progress':
+        return 'sync';
+      default:
+        return 'info';
     }
   }
 
   getStatusText(status: string = ''): string {
     switch (status) {
-      case 'completed': return 'Completado';
-      case 'error': return 'Error';
-      case 'pending': return 'Pendiente';
-      case 'in-progress': return 'En Progreso';
-      default: return 'Desconocido';
+      case 'completed':
+        return 'Completado';
+      case 'error':
+        return 'Error';
+      case 'pending':
+        return 'Pendiente';
+      case 'in-progress':
+        return 'En Progreso';
+      default:
+        return 'Desconocido';
     }
   }
 }

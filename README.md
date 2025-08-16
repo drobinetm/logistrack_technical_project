@@ -13,16 +13,15 @@
 
 ## 📑 Índice
 
-1. [Introducción](#introducción)
-2. [Resumen de Requerimientos Funcionales (5 días)](#requerimientos-funcionales-(5-días))
-3. [Instrucciones de instalación y ejecución](#instrucciones-de-instalación-y-ejecución)
-4. [Arquitectura General](#arquitectura-general)
+1. [Introducción](#-introducción)
+2. [Resumen de Requerimientos Funcionales (5 días)](#-resumen-de-requerimientos-funcionales-5-días)
+3. [Instrucciones de instalación y ejecución](#-instrucciones-de-instalación-y-ejecución)
+4. [Arquitectura General](#-arquitectura-general)
 5. [Rutas de la API REST](#rutas-de-la-api-rest)
-6. [Persistencia y Diseño de Base de Datos](#persistencia-y-diseño-de-base-de-datos)
-   * [Modelo Relacional](#modelo-relacional)
-   * [Migraciones](#migraciones)
-   * [Seed de Datos](#seed-de-datos)
-   * [Diagrama ERD / Schema](#diagrama-erd--schema)
+6. [Persistencia y Diseño de Base de Datos](#-persistencia-y-diseño-de-base-de-datos)
+   * [Modelo Relacional](#-modelo-relacional)
+   * [Migraciones](#-migraciones-de-datos)
+   * [Diagrama ERD](#-diagrama-entidad-relación-del-proyecto-erd)
 
 ---
 

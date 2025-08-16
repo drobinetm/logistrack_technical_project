@@ -9,8 +9,8 @@
 
 ## 📑 Índice
 
-1. [Introducción](#introducción)
-2. [Requerimientos Funcionales (5 días)](#requerimientos-funcionales-(5-días))
+1. [Introducción](#-introducción)
+2. [Requerimientos Funcionales (5 días)](#-requerimientos-funcionales-5-días)
 3. [Arquitectura del Proyecto](#arquitectura-del-proyecto)  
 4. [Rutas de la API REST](#rutas-de-la-api-rest)
 5. [Flujo de Procesos](#flujo-de-procesos)  

@@ -122,7 +122,8 @@ La arquitectura sigue un enfoque modular con separación de responsabilidades po
 * `[GET] /api/consolidacion/` → Agrupación de órdenes por chofer/bloque. Estado de completitud
 * `[GET] /api/distribucion/` → Entregas realizadas, pendientes y rechazadas con confirmaciones.
 
-> [!NOTE] Puede encontrar la colección del Postman en la carpeta **resources** del proyecto.
+> [!NOTE] 
+> Puede encontrar la colección del Postman en la carpeta **resources** del proyecto.
 
 ---
 
@@ -150,7 +151,8 @@ La arquitectura sigue un enfoque modular con separación de responsabilidades po
 
 - Cuando se hace la migración de los datos en el microservicio "backend-django", los datos que se insertan son los mismos sincronizados en el microservicio "backend-symfony". Para testear la prueba y el proyecto, en caso de las órdenes consolidadas se insertarán en un estado anterior para cuando se envie el evento al microservicio, se actualice el estado a **APROBADO (APPROVED)** y este sea listado en el flujo de **Consolidación de las Órdenes**.
 
-> NOTA: En un entorno ideal como parte del flujo en la plataforma, cada vez que se actualiza alguna información en el microservicio "backend-symfony", se debe enviar un evento al microservicio "backend-django" para que se actualice sus datos.
+> [!NOTE] 
+> En un entorno ideal como parte del flujo en la plataforma, cada vez que se actualiza alguna información en el microservicio "backend-symfony", se debe enviar un evento al microservicio "backend-django" para que se actualice sus datos.
 
 ---
 

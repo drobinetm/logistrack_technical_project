@@ -1,9 +1,7 @@
 # 📘 LogisTrack: Tarea Técnica (Symfony + Django + Angular)
 
-
 > [!NOTE] 
 > Por cuestiones de costumbre, el programador creó los mensajes de git, las entidades, las propiedades JSON y el código de las clases y funcionalidades que participan en el proyecto en inglés. Disculpen si esto puede ocasionar algún problema en su decisión Gracias.
-
 
 ## 🔗 Links a Documentación
 
@@ -89,7 +87,7 @@ REDIS_GROUP="main_group"
 #### ▶️ Symfony
 
 > [!IMPORTANT]
-> Importante: Copiar esta configuración a su env.dev
+> Copiar esta configuración a su env.dev
 > Reemplazar las conexiones a la BD por sus datos de conexión
 
 ```bash
@@ -120,7 +118,8 @@ docker-compose up --build
 
 #### ▶️ Django
 
-> Importante: Debe tener instalado python 3.10+ en su escritorio
+> [!IMPORTANT]
+> Debe tener instalado python 3.10+ en su escritorio
 
 ```bash
 # Clonar el repositorio
@@ -154,7 +153,8 @@ python manage.py runserver
 
 #### ▶️ Symfony
 
-> Importante: Debe tener instalado PHP en su escritorio
+> [!IMPORTANT]
+>  Debe tener instalado PHP en su escritorio
 
 ```bash
 # Clonar el repositorio
@@ -176,7 +176,8 @@ php bin/console doctrine:fixtures:load -n
 
 #### ▶️ Angular
 
-> Importante: Debe tener instalado Node.js en su escritorio
+> [!IMPORTANT]
+> Debe tener instalado Node.js en su escritorio
 
 ```bash
 # Clonar el repositorio
@@ -224,7 +225,8 @@ de eventos mediante streams de data (Pub/Sub) a través de Redis.
 * `[GET] /api/consolidacion/` → Agrupación de órdenes por chofer/bloque. Estado de completitud
 * `[GET] /api/distribucion/` → Entregas realizadas, pendientes y rechazadas con confirmaciones.
 
-> [!NOTE] Puede encontrar la colección del Postman en la carpeta **resources** del proyecto.
+> [!NOTE] 
+> Puede encontrar la colección del Postman en la carpeta **resources** del proyecto.
 
 ---
 
@@ -242,7 +244,8 @@ El sistema implementa un modelo basado en las siguientes entidades principales:
 
 ### 🔹 Migraciones de Datos
 
-> Las migraciones para cada uno de los microservicios son explicadas en la sección de instalación de los microservicios. 👉 [Instrucciones de instalación y ejecución](#-instrucciones-de-instalación-y-ejecución)
+> Las migraciones para cada uno de los microservicios son explicadas en la sección de instalación de los microservicios. 
+> 👉 [Instrucciones de instalación y ejecución](#-instrucciones-de-instalación-y-ejecución)
 
 ### 🔹 Diagrama Entidad Relación del Proyecto (ERD)
 

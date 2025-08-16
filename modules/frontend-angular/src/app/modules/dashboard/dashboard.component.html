@@ -1,57 +1,81 @@
 <div class="dashboard-container">
-  <h1>Panel de Control</h1>
-
-  <!-- KPI Cards -->
-  <div class="kpi-grid">
-    <mat-card *ngFor="let kpi of kpis" class="kpi-card">
-      <div class="kpi-content">
-        <mat-icon [style.color]="kpi.color">{{ kpi.icon }}</mat-icon>
-        <div class="kpi-number">{{ kpi.value }}</div>
-        <div class="kpi-label">{{ kpi.label }}</div>
-      </div>
-    </mat-card>
+  <div class="dashboard-header">
+    <h1>Panel de Control</h1>
   </div>
 
-  <!-- Charts and Map Section -->
-  <div class="dashboard-content">
-    <div class="chart-section">
-      <mat-card class="chart-card">
-        <mat-card-header>
-          <mat-card-title>Estado de Entregas</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="chart-placeholder">
-            <div class="pie-chart">
-              <div class="pie-segment completed" [style.--percentage]="completedPercentage + '%'">
-                <span class="pie-label">{{ completedPercentage }}% Completadas</span>
-              </div>
-              <div class="pie-segment pending" [style.--percentage]="pendingPercentage + '%'">
-                <span class="pie-label">{{ pendingPercentage }}% Pendientes</span>
-              </div>
-              <div class="pie-segment error" [style.--percentage]="errorPercentage + '%'">
-                <span class="pie-label">{{ errorPercentage }}% Con Error</span>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando datos del dashboard...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container">
+    <mat-icon color="warn">error_outline</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="reloadData()">
+      <mat-icon>refresh</mat-icon>
+      Reintentar
+    </button>
+  </div>
+
+  <!-- Content -->
+  <ng-container *ngIf="!isLoading && !error">
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <mat-card 
+        *ngFor="let kpi of kpis" 
+        class="kpi-card" 
+        [style.--kpi-color]="kpi.color"
+        [style.border-top-color]="kpi.color">
+        <div class="kpi-content">
+          <div class="kpi-icon">
+            <mat-icon>{{ kpi.icon }}</mat-icon>
+          </div>
+          <div class="kpi-details">
+            <div class="kpi-number">{{ kpi.value | number }}</div>
+            <div class="kpi-label">{{ kpi.label }}</div>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Charts and Map Section -->
+    <div class="dashboard-content">
+      <div class="chart-section">
+        <mat-card class="chart-card summary-card">
+          <mat-card-header>
+            <mat-card-title>Resumen de Pedidos</mat-card-title>
+            <mat-card-subtitle>Distribución por estado</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="status-summary">
+              <div class="status-item" *ngFor="let kpi of kpis.slice(1)">
+                <div class="status-indicator" [style.background-color]="kpi.color"></div>
+                <span class="status-label">{{ kpi.label }}:</span>
+                <span class="status-value" [style.color]="kpi.color">{{ kpi.value | number }}</span>
               </div>
             </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
 
-    <div class="map-section">
-      <mat-card class="map-card">
-        <mat-card-header>
-          <mat-card-title>Ubicaciones Activas</mat-card-title>
-          <mat-card-subtitle>Distribución geográfica actual</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <app-map
-            [markers]="mapMarkers"
-            [center]="[-33.4489, -70.6693]"
-            [zoom]="11">
-          </app-map>
-        </mat-card-content>
-      </mat-card>
+      <div class="map-section">
+        <mat-card class="map-card locations-card">
+          <mat-card-header>
+            <mat-card-title>Ubicaciones Activas</mat-card-title>
+            <mat-card-subtitle>Distribución geográfica actual</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <app-map
+              [markers]="mapMarkers"
+              [center]="[-33.4489, -70.6693]"
+              [zoom]="11"
+              [style.height.px]="400">
+            </app-map>
+          </mat-card-content>
+        </mat-card>
+      </div>
     </div>
-  </div>
-
+  </ng-container>
 </div>

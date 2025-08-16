@@ -62,7 +62,6 @@ interface MenuItem {
             *ngFor="let item of menuItems"
             [routerLink]="item.route"
             [class.active]="activeRoute === item.route"
-            (click)="closeDrawerOnMobile()"
           >
             <mat-icon matListIcon>{{ item.icon }}</mat-icon>
             <span>{{ item.name }}</span>
@@ -362,18 +361,17 @@ interface MenuItem {
 })
 export class AppComponent {
   @ViewChild('drawer') public drawer!: MatSidenav;
-  public isCollapsed = false;
 
+  public isCollapsed = false;
   public activeRoute = '/dashboard';
 
   public menuItems: MenuItem[] = [
-    { name: 'Inicio', icon: 'dashboard', route: '/dashboard' },
-    { name: 'Despacho', icon: 'send', route: '/dispatch' },
+    { name: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
+    { name: 'Recepción', icon: 'inventory_2', route: '/receiving' },
     { name: 'Preparación', icon: 'inventory', route: '/preparation' },
-    { name: 'Envíos', icon: 'local_shipping', route: '/shipping' },
-    { name: 'Recepción', icon: 'inbox', route: '/receiving' },
-    { name: 'Consolidación', icon: 'view_kanban', route: '/consolidation' },
-    { name: 'Distribución', icon: 'map', route: '/distribution' },
+    { name: 'Despacho', icon: 'local_shipping', route: '/dispatch' },
+    { name: 'Distribución', icon: 'delivery_dining', route: '/distribution' },
+    { name: 'Consolidación', icon: 'merge', route: '/consolidation' },
   ];
 
   public isHandset$: Observable<boolean>;

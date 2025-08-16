@@ -18,7 +18,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-logis_track_symfony}
       MYSQL_USER: ${MYSQL_USER:-userdb}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password_db}
-    container_name: mysql
+    container_name: mysql-symfony
     ports:
       - "3307:3306"
     volumes:
@@ -32,9 +32,9 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-logis_track_django}
       MYSQL_USER: ${MYSQL_USER:-userdb}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password_db}
-    container_name: mysql
+    container_name: mysql-django
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
       - mysql-sf-data:/var/lib/mysql
     networks: [ tracknet ]
@@ -51,7 +51,7 @@ services:
     volumes:
       - ./modules/backend-symfony:/var/www/html
     depends_on:
-      - mysql
+      - mysql-symfony
       - redis
     ports:
       - "8081"
@@ -74,7 +74,7 @@ services:
     volumes:
       - ./modules/backend-django:/app/backend-django
     depends_on:
-      - mysql
+      - mysql-django
       - redis
     entrypoint: ["/app/backend-django/entrypoint.sh"]
     ports:

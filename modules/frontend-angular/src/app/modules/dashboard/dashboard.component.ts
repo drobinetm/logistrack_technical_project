@@ -3,7 +3,11 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatGridListModule } from '@angular/material/grid-list';
-import { DataService, KPI, Order } from '../../services/data.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { finalize } from 'rxjs/operators';
+
+import { DashboardService } from '../../services/dashboard.service';
+import { DashboardOrder, KPI, MapMarker } from '../../interfaces/dashboard.interface';
 import { MapComponent } from '../../shared/map.component';
 
 @Component({
@@ -11,52 +15,53 @@ import { MapComponent } from '../../shared/map.component';
   standalone: true,
   templateUrl: './dashboard.component.html',
   providers: [{ provide: 'BASE_API_URL', useValue: 'http://localhost:8000/api' }],
-  imports: [CommonModule, MatCardModule, MatIconModule, MatGridListModule, MapComponent],
+  imports: [CommonModule, MatCardModule, MatIconModule, MatGridListModule, MatProgressSpinnerModule, MapComponent],
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit {
   public kpis: KPI[] = [];
-  public orders: Order[] = [];
-  public mapMarkers: any[] = [];
+  public orders: DashboardOrder[] = [];
+  public mapMarkers: MapMarker[] = [];
+  public isLoading = true;
+  public error: string | null = null;
 
-  public completedPercentage = 45;
-  public pendingPercentage = 35;
-  public errorPercentage = 20;
-
-  constructor(private dataService: DataService) {}
+  constructor(private dashboardService: DashboardService) {}
 
   public ngOnInit(): void {
-    this.kpis = this.dataService.getKPIs();
-
-    this.dataService.getOrders().subscribe((orders) => {
-      this.orders = orders;
-      this.updateMapMarkers();
-    });
+    this.loadDashboardData();
   }
 
-  private updateMapMarkers(): void {
-    this.mapMarkers = this.orders
-      .filter((order) => order.lat && order.lng && order.status === 'in-progress')
-      .slice(0, 10)
-      .map((order) => ({
-        lat: order.lat!,
-        lng: order.lng!,
-        title: `${order.id} - ${order.destination}`,
-        color: this.getMarkerColor(order.status),
-        popup: `<b>${order.id}</b><br>Destino: ${order.destination}<br>Estado: ${order.status}`,
-      }));
+  /**
+   * Loads dashboard data from the API
+   */
+  private loadDashboardData(): void {
+    this.isLoading = true;
+    this.error = null;
+
+    this.dashboardService
+      .getDashboardData()
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+        })
+      )
+      .subscribe({
+        next: (data) => {
+          this.orders = data.orders;
+          this.kpis = this.dashboardService.getKPIs(data.orders);
+          this.mapMarkers = this.dashboardService.getMapMarkers(data.orders);
+        },
+        error: (err) => {
+          console.error('Error loading dashboard data:', err);
+          this.error = 'Error al cargar los datos del dashboard. Por favor, intente nuevamente.';
+        },
+      });
   }
 
-  private getMarkerColor(status: string): string {
-    switch (status) {
-      case 'completed':
-        return 'green';
-      case 'error':
-        return 'red';
-      case 'pending':
-        return 'yellow';
-      default:
-        return 'blue';
-    }
+  /**
+   * Reloads the dashboard data
+   */
+  public reloadData(): void {
+    this.loadDashboardData();
   }
 }

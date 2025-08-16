@@ -14,7 +14,7 @@
 3. [Flujo de Interacción](#flujo-de-interacción)  
 4. [Casos de Uso](#casos-de-uso)  
 5. [Limitaciones](#limitaciones)  
-6. [Futuras Mejoras](#futuras-mejoras)
+6. [Agentes AI utilizados](#agentes-ai-utilizados)
 
 ---
 
@@ -32,7 +32,8 @@ Este **Asistente Inteligente** , en nuestro caso **Winsurf** se utilizó como co
 - Interpretar consultas del usuario.  
 - Automatizar generación de documentación.  
 - Responder preguntas técnicas.  
-- Sugerir mejoras en arquitectura y código.  
+- Sugerir mejoras en arquitectura y código.
+- Refactorizar el código mediante iteraciones.
 
 ---
 
@@ -41,4 +42,20 @@ Este **Asistente Inteligente** , en nuestro caso **Winsurf** se utilizó como co
 - Generación automática de documentación técnica.  
 - Apoyo en debugging de procesos.  
 - Explicaciones de código o arquitectura.  
-- Recomendaciones de optimización.  
+- Recomendaciones de optimización.
+
+---
+
+## 🔹Limitaciones
+
+- Apoyo de Agentes AI gratis (Respuestas con más errores y requieren más supervisión y revisión)
+- Latencia en las respuestas al interactuar en modo "Pair Programming" (Las iteraciones con la AI son propensas a romper el flujo de programación) 
+
+---
+
+## 🔹Agentes AI utilizados
+
+- [Winsurf](https://windsurf.com/)
+- [Warp](https://www.warp.dev/)
+
+![Winsurf Resumen](resources/example_agente_ai_winsurf.png)

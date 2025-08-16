@@ -160,3 +160,18 @@ La arquitectura sigue un enfoque modular con separación de responsabilidades po
 - Se prueban todas las listas con casos de usos.
 - Las listas participan en las respuestas interactivas con la interfaz de usuario.
 - Las pruebas a su vez, son para los viewsets creados mediante Django Rest Framework.
+
+```bash
+# Clonar el repositorio
+git clone https://github.com/drobinetm/logistrack_technical_project.git
+cd logistrack_technical_project/modules/backend-django
+
+# Crear entorno virtual (Python ejemplo)
+python -m venv venv
+source venv/bin/activate
+
+# Correr las pruebas
+python -m pytest service_app/tests
+```
+
+![ERD](resources/unit_tests.png)

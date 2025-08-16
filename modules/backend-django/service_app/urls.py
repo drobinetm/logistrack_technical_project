@@ -11,6 +11,7 @@ from .viewsets.process_viewsets import (
     ReceivingViewSet,
     ShippingViewSet,
 )
+from .viewsets.dashboard_viewsets import DashboardViewSet
 
 router = DefaultRouter()
 
@@ -26,6 +27,10 @@ router.register(r"distribucion", DistributionOrdersViewSet, basename="distributi
 router.register(
     r"distribucion/bloques", BlockDistributionViewSet, basename="distribution-blocks"
 )
+
+# Dashboard's endpoints
+router.register(r"dashboard", DashboardViewSet, basename="dashboard")
+
 
 urlpatterns = [
     path("", views.index, name="index"),

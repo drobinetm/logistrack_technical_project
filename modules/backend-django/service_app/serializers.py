@@ -99,6 +99,14 @@ class OrderWithProductsSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+# Read-only nested serializers for dashboard data
+class OrderDashboardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ("status", "destination", "code", "latitude", "longitude")
+        read_only_fields = fields
+
+
 class BlockDistributionSerializer(serializers.ModelSerializer):
     orders = OrderWithProductsSerializer(many=True, read_only=True)
 

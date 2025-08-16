@@ -190,7 +190,7 @@ El sistema implementa un modelo basado en las siguientes entidades principales:
 
 ### 🔹 Migraciones de Datos
 
-> Las migraciones para cada uno de los microservicios son explicadas en la sección de instalación de los microservicios. 👉 [Instrucciones de instalación y ejecución](#instrucciones-de-instalación-y-ejecución)
+> Las migraciones para cada uno de los microservicios son explicadas en la sección de instalación de los microservicios. 👉 [Instrucciones de instalación y ejecución](#-instrucciones-de-instalación-y-ejecución)
 
 ### 🔹 Diagrama Entidad Relación del Proyecto (ERD)
 

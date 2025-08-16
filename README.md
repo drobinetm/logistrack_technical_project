@@ -1,7 +1,8 @@
 # 📘 LogisTrack: Tarea Técnica (Symfony + Django + Angular)
 
 
-> [!NOTE] Por cuestiones de costumbre, el programador creó los mensajes de git, las entidades, las propiedades JSON y el código de las clases y funcionalidades que participan en el proyecto en inglés. Disculpen si esto puede ocasionar algún problema en su decisión Gracias.
+> [!NOTE] 
+> Por cuestiones de costumbre, el programador creó los mensajes de git, las entidades, las propiedades JSON y el código de las clases y funcionalidades que participan en el proyecto en inglés. Disculpen si esto puede ocasionar algún problema en su decisión Gracias.
 
 
 ## 🔗 Links a Documentación
@@ -55,6 +56,57 @@ En la parte de [DOCUMENTACION.md](./DOCUMENTACION.md) del proyecto, se explican 
 * Docker & Docker Compose (Correr por Docker)
 * Base de datos: MySQL
 * Servicio Redis
+
+### ▶️ Pasos importantes para las variables de entorno
+
+#### ▶️ Django
+
+> [!IMPORTANT]
+> Copiar esta configuración a su env.dev.
+> Reemplazar las conexiones a la BD por sus datos de conexión
+
+```bash
+DEBUG=True
+
+## database config
+DJANGO_SETTINGS_MODULE=app.settings
+
+# python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+DJANGO_SECRET_KEY="secret_key"
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=logis_track_django
+DB_USER=root
+DB_PASSWORD=123
+
+### redis service
+REDIS_URL="redis://localhost:6379/0"
+REDIS_STREAM="0"
+REDIS_CONSUMER="worker-1"
+REDIS_GROUP="main_group"
+```
+
+#### ▶️ Symfony
+
+> [!IMPORTANT]
+> Importante: Copiar esta configuración a su env.dev
+> Reemplazar las conexiones a la BD por sus datos de conexión
+
+```bash
+###> symfony/framework-bundle ###
+APP_SECRET=4454a90cc6edf99d735834b4502ab9fc
+###< symfony/framework-bundle ###
+
+###> doctrine/doctrine-bundle ###
+DATABASE_URL="mysql://root:123@localhost:3306/logis_track_symfony?charset=utf8mb4"
+###< doctrine/doctrine-bundle ###
+
+### redis service
+REDIS_URL="redis://localhost:6379/0"
+REDIS_STREAM="events_stream"
+REDIS_CONSUMER="worker-1"
+REDIS_GROUP="main_group"
+``` 
 
 ### ▶️ Pasos de instalación (Docker)
 
@@ -133,7 +185,7 @@ git clone https://github.com/drobinetm/logistrack_technical_project.git
 cd logistrack_technical_project/modules/frontend-angular
 
 # Instalar dependencias
-nvm use 22 # Opcional: Si tiene instalado nvm, sino de tener instalado Node.js v22.11.1+
+nvm use 22 # Opcional: Si tiene instalado nvm, sino debe tener instalado Node.js v22.11.1+
 npm install
 
 # Ejecutar el servidor

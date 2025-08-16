@@ -11,10 +11,9 @@
 
 1. [Introducción](#introducción)  
 2. [Objetivos de la IA](#objetivos-de-la-ia)  
-3. [Flujo de Interacción](#flujo-de-interacción)  
-4. [Casos de Uso](#casos-de-uso)  
-5. [Limitaciones](#limitaciones)  
-6. [Agentes AI utilizados](#agentes-ai-utilizados)
+3. [Casos de Uso](#casos-de-uso)  
+4. [Limitaciones](#limitaciones)  
+5. [Agentes AI utilizados](#agentes-ai-utilizados)
 
 ---
 

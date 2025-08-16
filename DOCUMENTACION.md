@@ -9,8 +9,8 @@
 
 ## 📑 Índice
 
-1. [Introducción](#introducción)
-2. [Requerimientos Funcionales (5 días)](#requerimientos-funcionales-(5-días))
+1. [Introducción](#-introducción)
+2. [Requerimientos Funcionales (5 días)](#-requerimientos-funcionales-5-días)
 3. [Arquitectura del Proyecto](#arquitectura-del-proyecto)  
 4. [Rutas de la API REST](#rutas-de-la-api-rest)
 5. [Flujo de Procesos](#flujo-de-procesos)  
@@ -21,7 +21,7 @@
 ## 📖 Introducción
 
 
-Este documento describe la arquitectura, los componentes principales y el flujo de trabajo del proyecto. Está orientado a desarrolladores y colaboradores que deseen comprender, mantener y mejorar la solución.
+Este documento describe la arquitectura, los componentes principales y el flujo de trabajo del proyecto. Está orientado a desarrolladores y colaboradores que deseen comprender, mantener y mejorar la solución. El proyecto se desarrolló usando [Git Flow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) para mantener la coherencia entre las ramas [main, develop, features]
 
 ---
 

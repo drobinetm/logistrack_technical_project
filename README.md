@@ -57,11 +57,14 @@ En la parte de [DOCUMENTACION.md](./DOCUMENTACION.md) del proyecto, se explican 
 
 ### ▶️ Pasos importantes para las variables de entorno
 
+> [!NOTE]
+> En caso de que desee testear el proyecto de forma local, se recomienda configurar las variables de entorno en los microservicios de Django y Symfony.
+
 #### ▶️ Django
 
 > [!IMPORTANT]
 > Copiar esta configuración a su env.dev.
-> Reemplazar las conexiones a la BD por sus datos de conexión
+> o reemplazar las conexiones a la BD por sus datos de conexión
 
 ```bash
 DEBUG=True
@@ -88,7 +91,7 @@ REDIS_GROUP="main_group"
 
 > [!IMPORTANT]
 > Copiar esta configuración a su env.dev
-> Reemplazar las conexiones a la BD por sus datos de conexión
+> o reemplazar las conexiones a la BD por sus datos de conexión
 
 ```bash
 ###> symfony/framework-bundle ###
@@ -111,7 +114,7 @@ REDIS_GROUP="main_group"
 ```bash
 # Clonar el repositorio
 git clone https://github.com/drobinetm/logistrack_technical_project.git
-cd logistrack_technical_project/modules/backend-django
+cd logistrack_technical_project
 
 # Correr docker compose 
 docker-compose up --build
@@ -131,8 +134,9 @@ docker exec -it django_app python manage.py loaddata service_app/fixtures/order_
 * Para testear la comunicación de eventos entre los microservicios con redis, se deben utilizar los comandos:
     * `docker exec -it django_app python manage.py redis_consumer_command`
     *  `docker exec -it symfony_app php bin/console app:publish-event`
+* Debe seguir los pasos de la sección [Testeando la comunicación de eventos entre los microservicios](#-testeando-la-comunicación-de-eventos-entre-los-microservicios)
 
-### ▶️ Pasos de instalación (Sin Docker)
+### ▶️ Pasos de instalación (Local)
 
 #### ▶️ Django
 
@@ -213,16 +217,16 @@ npm run start
 
 ---
 
-### ▶️ Testeando la comunicación de eventos entre los microservicios (Sin Docker)
+### ▶️ Testeando la comunicación de eventos entre los microservicios
 
 > [!IMPORTANT]
 > Comando para correr el consumidor de eventos en Python: `python manage.py redis_consumer_command`
 > Comando para correr el publicador de eventos en Symfony: `php bin/console app:publish-event`
 
-1. Configurar las variables de entorno en los microservicios (Django y Symfony)
-2. Verificar que tiene instalado redis en su escritorio y que este corriendo en el puerto 6379
-3. Verificar que tiene instalado mysql en su escritorio y que este corriendo en el puerto 3306
-4. Verificar que las variables de entorno apunten a la base de datos y al servicio redis
+1. Configurar las variables de entorno en los microservicios (Django y Symfony)  → [Testeando Local]
+2. Verificar que tiene instalado redis en su escritorio y que este corriendo en el puerto 6379  → [Testeando Local]
+3. Verificar que tiene instalado mysql en su escritorio y que este corriendo en el puerto 3306 →  [Testeando Local]
+4. Verificar que las variables de entorno apunten a la base de datos y al servicio redis →  [Testeando Local]
 5. `Correr redis-cli monitor` (Si es en una terminar a parte, mejor para que observe el log de eventos)
 ![EV_1](resources/EV_1.png)
 6. En otra terminal, moverse al directorio backend-django: `cd logistrack_technical_project/modules/backend-django`

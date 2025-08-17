@@ -18,7 +18,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-logis_track_symfony}
       MYSQL_USER: ${MYSQL_USER:-userdb}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password_db}
-    container_name: mysql
+    container_name: mysql-symfony
     ports:
       - "3307:3306"
     volumes:
@@ -32,9 +32,9 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-logis_track_django}
       MYSQL_USER: ${MYSQL_USER:-userdb}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password_db}
-    container_name: mysql
+    container_name: mysql-django
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
       - mysql-sf-data:/var/lib/mysql
     networks: [ tracknet ]
@@ -46,15 +46,15 @@ services:
     container_name: symfony_app
     environment:
       APP_ENV: dev
-      DATABASE_URL: mysql://${MYSQL_SYMFONY_USER:-userdb}:${MYSQL_SYMFONY_PASS:-password_db}@mysql:3306/${MYSQL_SYMFONY_DB:-logis_track_symfony}
+      DATABASE_URL: mysql://${MYSQL_SYMFONY_USER:-userdb}:${MYSQL_SYMFONY_PASS:-password_db}@mysql-symfony:3306/${MYSQL_SYMFONY_DB:-logis_track_symfony}
       REDIS_URL: redis://redis:6379/0
     volumes:
       - ./modules/backend-symfony:/var/www/html
     depends_on:
-      - mysql
+      - mysql-symfony
       - redis
     ports:
-      - "8081"
+      - "8081:8081"
     networks: [tracknet]
 
   django:
@@ -65,7 +65,7 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: app.settings
       DJANGO_SECRET_KEY: "usctan6@d708c2s8"
-      DB_HOST: mysql
+      DB_HOST: mysql-django
       DB_PORT: 3306
       DB_NAME: ${MYSQL_DJANGO_DB:-logis_track_django}
       DB_USER: ${MYSQL_DJANGO_USER:-userdb}
@@ -74,11 +74,11 @@ services:
     volumes:
       - ./modules/backend-django:/app/backend-django
     depends_on:
-      - mysql
+      - mysql-django
       - redis
     entrypoint: ["/app/backend-django/entrypoint.sh"]
     ports:
-      - "8000"
+      - "8000:8000"
     networks: [tracknet]
 
   angular:

@@ -114,7 +114,7 @@ docker-compose up --build
 
 * El servicio estará disponible en: 👉 `http://localhost:4200` 
 
-### 🚀 Pasos de instalación (Manual)
+### ▶️ Pasos de instalación (Sin Docker)
 
 #### ▶️ Django
 
@@ -194,6 +194,31 @@ npm run start
 ```
 
 ---
+
+### ▶️ Testeando la comunicación de eventos entre los microservicios (Sin Docker)
+
+> [!IMPORTANT]
+> Comando para correr el consumidor de eventos en Python: `python manage.py redis_consumer_command`
+> Comando para correr el publicador de eventos en Symfony: `php bin/console app:publish-event`
+
+1. Configurar las variables de entorno en los microservicios (Django y Symfony)
+2. Verificar que tiene instalado redis en su escritorio y que este corriendo en el puerto 6379
+3. Verificar que tiene instalado mysql en su escritorio y que este corriendo en el puerto 3306
+4. Verificar que las variables de entorno apunten a la base de datos y al servicio redis
+5. `Correr redis-cli monitor` (Si es en una terminar a parte, mejor para que observe el log de eventos)
+![EV_1](resources/EV_1.png)
+6. En otra terminal, moverse al directorio backend-django: `cd logistrack_technical_project/modules/backend-django`
+7. En otra terminal, moverse al directorio backend-symfony: `cd logistrack_technical_project/modules/backend-symfony`
+8. En la terminal de backend-django, correr `python manage.py redis_consumer_command`
+![EV_2](resources/EV_2.png)
+9. En la terminal de backend-symfony, correr `php bin/console app:publish-event`
+   * Se va a mostrar en la terminal opciones para elegir la orden a enviar hacia el microservicio de Django
+   * Al seleccionar la orden, se va a mostrar el evento que se va a enviar al microservicio de Django
+   * Podrá ver en la terminal de redis-cli los eventos que se están enviando al microservicio de Django
+![EV_3](resources/EV_3.png)
+10. Podrá observar en la base de datos de Django las órdenes que cambian al estado de "APROVADO" (APPROVED)
+![EV_4](resources/EV_4.png)
+![EV_5](resources/EV_5.png)
 
 ## 🏗️ Arquitectura General
 

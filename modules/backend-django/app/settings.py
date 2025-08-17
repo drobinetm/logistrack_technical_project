@@ -92,7 +92,7 @@ DATABASES = {
         "USER": os.getenv("DB_USER", "userdb"),
         "PASSWORD": os.getenv("DB_PASSWORD", "password_db"),
         "HOST": os.getenv("DB_HOST", "mysql-django"),
-        "PORT": int(os.getenv("DB_PORT", "3306")),
+        "PORT": int(os.getenv("DB_PORT", 3306)),
         "OPTIONS": {
             "charset": "utf8mb4",
         },

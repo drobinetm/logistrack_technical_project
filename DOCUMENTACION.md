@@ -145,7 +145,7 @@ La arquitectura sigue un enfoque modular con separación de responsabilidades po
     * Despacho (Dispach) → EN_DESPACHO (IN_DISPATCH)
     * Preparación (Preparation) → PENDIENTE (PENDING)
     * Expedición (Shipping) → COMPLETADO (COMPLETED)
-    * Recepción (Receiving) → LISTO_PARA_ENTREGA (READY_TO_SHIP)
+    * Recepción (Receiving) → LISTO_PARA_ENVIO (READY_TO_SHIP)
     * Consolidación (Consolidation) → APROBADO (APPROVED)
     * Distribución (Distribution) → ENTREGADO (DELIVERED), PENDIENTE (PENDING), RECHAZADO (REJECTED)
 

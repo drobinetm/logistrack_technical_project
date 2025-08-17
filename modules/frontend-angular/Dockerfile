@@ -3,7 +3,7 @@ FROM node:20-alpine as build
 WORKDIR /app/frontend-angular
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
-COPY . /app/frontend-angular
+COPY . .
 RUN npm run build -- --configuration production
 
 # Season 2: Nginx

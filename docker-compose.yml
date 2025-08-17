@@ -9,7 +9,8 @@ services:
       - "6380:6379"
     volumes:
       - redis-data:/data
-    networks: [tracknet]
+    networks:
+      - tracknet
 
   mysql-symfony:
     image: mysql:8.0
@@ -20,10 +21,11 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password_db}
     container_name: mysql-symfony
     ports:
-      - "3307:3306"
+      - "3337:3306"
     volumes:
       - mysql-sf-data:/var/lib/mysql
-    networks: [tracknet]
+    networks:
+      - tracknet
 
   mysql-django:
     image: mysql:8.0
@@ -34,10 +36,11 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password_db}
     container_name: mysql-django
     ports:
-      - "3308:3306"
+      - "3338:3306"
     volumes:
-      - mysql-sf-data:/var/lib/mysql
-    networks: [ tracknet ]
+      - mysql-dj-data:/var/lib/mysql
+    networks:
+      - tracknet
 
   symfony:
     build:
@@ -46,7 +49,7 @@ services:
     container_name: symfony_app
     environment:
       APP_ENV: dev
-      DATABASE_URL: mysql://${MYSQL_SYMFONY_USER:-userdb}:${MYSQL_SYMFONY_PASS:-password_db}@mysql-symfony:3306/${MYSQL_SYMFONY_DB:-logis_track_symfony}
+      DATABASE_URL: mysql://${MYSQL_USER:-userdb}:${MYSQL_PASSWORD:-password_db}@mysql-symfony:3306/${MYSQL_DATABASE:-logis_track_symfony}
       REDIS_URL: redis://redis:6379/0
     volumes:
       - ./modules/backend-symfony:/var/www/html
@@ -55,7 +58,8 @@ services:
       - redis
     ports:
       - "8081:8081"
-    networks: [tracknet]
+    networks:
+      - tracknet
 
   django:
     build:
@@ -67,9 +71,9 @@ services:
       DJANGO_SECRET_KEY: "usctan6@d708c2s8"
       DB_HOST: mysql-django
       DB_PORT: 3306
-      DB_NAME: ${MYSQL_DJANGO_DB:-logis_track_django}
-      DB_USER: ${MYSQL_DJANGO_USER:-userdb}
-      DB_PASSWORD: ${MYSQL_DJANGO_PASS:-password_db}
+      DB_NAME: ${MYSQL_DATABASE:-logis_track_django}
+      DB_USER: ${MYSQL_USER:-userdb}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-password_db}
       REDIS_URL: redis://redis:6379/0
     volumes:
       - ./modules/backend-django:/app/backend-django
@@ -79,33 +83,20 @@ services:
     entrypoint: ["/app/backend-django/entrypoint.sh"]
     ports:
       - "8000:8000"
-    networks: [tracknet]
+    networks:
+      - tracknet
 
   angular:
     build:
       context: ./modules/frontend-angular
       dockerfile: Dockerfile
     container_name: angular_app
-    depends_on:
-      - symfony
-      - django
-    ports:
-      - "4200:80"
-    networks: [tracknet]
-
-  nginx:
-    image: nginx:alpine
-    container_name: nginx
     volumes:
-      - ./modules/frontend-angular/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./modules/frontend-angular:/app/frontend-angular
     ports:
-      - "80:80"
-    depends_on:
-      - angular
-      - django
-      - symfony
-    restart: always
-    networks: [tracknet]
+      - "4200:4200"
+    networks:
+      - tracknet
 
 volumes:
   redis-data:

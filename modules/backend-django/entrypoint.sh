@@ -1,15 +1,6 @@
 #!/bin/sh
 set -e
 
-echo "Waiting MySQL..."
-until nc -z mysql 3306; do
-  sleep 1
-done
-echo "MySQL Done ✅"
-
-echo "Running tests..."
-python -m pytest service_app/tests
-
 echo "Running migrations..."
 python manage.py migrate --noinput
 

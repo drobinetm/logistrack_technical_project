@@ -11,10 +11,12 @@
 
 1. [Introducción](#-introducción)
 2. [Requerimientos Funcionales (5 días)](#-requerimientos-funcionales-5-días)
-3. [Arquitectura del Proyecto](#arquitectura-del-proyecto)  
-4. [Rutas de la API REST](#rutas-de-la-api-rest)
-5. [Flujo de Procesos](#flujo-de-procesos)  
-6. [Pruebas Unitarias](#pruebas-unitarias)  
+3. [Arquitectura del Proyecto](#arquitectura-del-proyecto)
+4. [Agentes AI utilizados](#agentes-ai-utilizados)
+5. [Retos encontrados (Soluciones)](#retos-encontrados-soluciones)
+5. [Rutas de la API REST](#rutas-de-la-api-rest)
+6. [Flujo de Procesos](#flujo-de-procesos) 
+7. [Pruebas Unitarias](#pruebas-unitarias) 
 
 ---
 
@@ -107,6 +109,26 @@ La arquitectura sigue un enfoque modular con separación de responsabilidades po
 - **Frontend**: Interacción con el usuario mediante un dashboard informativo con tablas que muestran la información.
 
 ![Arquitectura](resources/architecture%20diagram.png)
+
+---
+
+## 🔹Agentes AI utilizados
+
+- [Winsurf](https://windsurf.com/)
+- [Warp](https://www.warp.dev/)
+
+![Winsurf Resumen](resources/example_agente_ai_winsurf.png)
+
+---
+
+## 🔹Retos encontrados (Soluciones)
+
+1. Reto en la sincronización con los microservicios para obtener desde Python (Servicio en Django)
+  el evento con la clase serializada en PHP:
+    - **Problema:** PHP al serializar las clases o los mensajes que pasamos a Redis Streams, codifica la cadena agregando en utf-8 varios carácteres
+    que desde Python no se podían recuperar sin parsear la data. 
+    - **Solución:** SymfonyMessenger que es la clase que se usó para enviar por Redis los datos, permite agregarle serializer que convierten en JSON aceptable
+    la data enviada. De esa forma, desde Python (Servicio en Django)`se obtiene un JSON con mejor formato para obtener los datos de la orden.
 
 ---
 

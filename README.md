@@ -109,10 +109,28 @@ REDIS_GROUP="main_group"
 ### ▶️ Pasos de instalación (Docker)
 
 ```bash
+# Clonar el repositorio
+git clone https://github.com/drobinetm/logistrack_technical_project.git
+cd logistrack_technical_project/modules/backend-django
+
+# Correr docker compose 
 docker-compose up --build
+docker-compose up -d
+
+# Cargar datos iniciales (Servicio Symfony)
+docker exec -it symfony_app php bin/console doctrine:fixtures:load --env=dev --no-interaction
+
+# Cargar datos iniciales (Servicio Django)
+docker exec -it django_app python manage.py loaddata service_app/fixtures/block_data.json --settings=app.settings
+docker exec -it django_app python manage.py loaddata service_app/fixtures/driver_data.json --settings=app.settings
+docker exec -it django_app python manage.py loaddata service_app/fixtures/product_data.json --settings=app.settings
+docker exec -it django_app python manage.py loaddata service_app/fixtures/order_data.json --settings=app.settings
 ```
 
-* El servicio estará disponible en: 👉 `http://localhost:4200` 
+* La app estará disponible en: 👉 `http://localhost:4200` . Es posible que deba esperar unos segundos para que la app se inicie.
+* Para testear la comunicación de eventos entre los microservicios con redis, se deben utilizar los comandos:
+    * `docker exec -it django_app python manage.py redis_consumer_command`
+    *  `docker exec -it symfony_app php bin/console app:publish-event`
 
 ### ▶️ Pasos de instalación (Sin Docker)
 
